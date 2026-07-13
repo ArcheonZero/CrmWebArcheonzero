@@ -73,14 +73,15 @@ dotnet run
 ArcheonZero — GitHub
 
 Версия: 2.0.1 — 13 июля 2026
-CRM Web Archeonzero
+---
+# CRM Web Archeonzero
 
 Version 2.0.1 — web-based CRM system built on ASP.NET Core.
-📋 About
+# 📋 About
 
 CRM Web Archeonzero is a web application for managing clients, tasks, and interactions.
 Built with ASP.NET Core MVC, Entity Framework Core, and SQLite.
-🗂️ Project Structure
+# 🗂️ Project Structure
 
 ```
 📁 CrmWebArcheonzero/                 # Project root
@@ -113,7 +114,7 @@ Built with ASP.NET Core MVC, Entity Framework Core, and SQLite.
 ├── 📄 appsettings.json               # Configuration (DB, connection strings)
 └── 📄 CrmWebArcheonzero.csproj       # Project file
 ```
-⚡ Key Features
+# ⚡ Key Features
 Feature	Description
 Authentication	Login/Logout, 4 roles (Admin, SuperManager, Manager, User)
 Clients	CRUD, search, status filter, recycle bin
@@ -122,7 +123,7 @@ Notes	Quick client notes
 Interactions	Calls, emails, meetings
 Dashboard	Status statistics
 Export	Excel (EPPlus), PDF (QuestPDF)
-🚀 Running
+# 🚀 Running
 bash
 
 git clone https://github.com/ArcheonZero/CrmWebArcheonzero.git
@@ -133,7 +134,7 @@ dotnet run
 Demo access:
 Login: admin
 Password: admin123
-🙏 Acknowledgments
+# 🙏 Acknowledgments
 
 Inspiration and support — Oracle Zero.
 Technical dialogue, structuring of ideas, and collaborative building — all of this was born in a living conversation.

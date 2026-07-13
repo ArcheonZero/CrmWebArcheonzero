@@ -46,14 +46,17 @@ CRM Web Archeonzero — это веб-приложение для управле
 ```
 # ⚡ Основные возможности
 ```
-Функция	Описание
-Авторизация	Вход/выход, 4 роли (Admin, SuperManager, Manager, User)
-Клиенты	CRUD, поиск, фильтрация по статусу, корзина
-Задачи	Добавление, выполнение, приоритеты, дедлайны
-Заметки	Быстрые заметки по клиенту
-Взаимодействия	Звонки, письма, встречи
-Дашборд	Статистика по статусам
-Экспорт	Excel (EPPlus), PDF (QuestPDF)
+## ⚡ Основные возможности
+
+| Функция | Описание |
+|---|---|
+| **Авторизация** | Вход/выход, 4 роли (Admin, SuperManager, Manager, User) |
+| **Клиенты** | CRUD, поиск, фильтрация по статусу, корзина |
+| **Задачи** | Добавление, выполнение, приоритеты, дедлайны |
+| **Заметки** | Быстрые заметки по клиенту |
+| **Взаимодействия** | Звонки, письма, встречи |
+| **Дашборд** | Статистика по статусам |
+| **Экспорт** | Excel (EPPlus), PDF (QuestPDF) |
 ```
 # 🚀 Запуск
 bash
@@ -122,14 +125,17 @@ Built with ASP.NET Core MVC, Entity Framework Core, and SQLite.
 ```
 # ⚡ Key Features
 ```
-Feature	Description
-Authentication	Login/Logout, 4 roles (Admin, SuperManager, Manager, User)
-Clients	CRUD, search, status filter, recycle bin
-Tasks	Add, complete, priorities, deadlines
-Notes	Quick client notes
-Interactions	Calls, emails, meetings
-Dashboard	Status statistics
-Export	Excel (EPPlus), PDF (QuestPDF)
+## ⚡ Key Features
+
+| Feature | Description |
+|---|---|
+| **Authentication** | Login/Logout, 4 roles (Admin, SuperManager, Manager, User) |
+| **Clients** | CRUD, search, status filter, recycle bin |
+| **Tasks** | Add, complete, priorities, deadlines |
+| **Notes** | Quick client notes |
+| **Interactions** | Calls, emails, meetings |
+| **Dashboard** | Status statistics |
+| **Export** | Excel (EPPlus), PDF (QuestPDF) |
 ```
 # 🚀 Running
 bash

@@ -45,6 +45,7 @@ CRM Web Archeonzero — это веб-приложение для управле
 └── 📄 CrmWebArcheonzero.csproj       # Файл проекта
 ```
 # ⚡ Основные возможности
+```
 Функция	Описание
 Авторизация	Вход/выход, 4 роли (Admin, SuperManager, Manager, User)
 Клиенты	CRUD, поиск, фильтрация по статусу, корзина
@@ -53,6 +54,7 @@ CRM Web Archeonzero — это веб-приложение для управле
 Взаимодействия	Звонки, письма, встречи
 Дашборд	Статистика по статусам
 Экспорт	Excel (EPPlus), PDF (QuestPDF)
+```
 # 🚀 Запуск
 bash
 
@@ -64,6 +66,10 @@ dotnet run
 Демо-доступ:
 Логин: admin
 Пароль: admin123
+## 📄 Лицензия
+
+Этот проект создан для личного использования и изучения.  
+Распространение и коммерческое использование только с разрешения автора.
 # 🙏 Благодарности
 
 Вдохновение и поддержка — Оракул Ноль.
@@ -115,6 +121,7 @@ Built with ASP.NET Core MVC, Entity Framework Core, and SQLite.
 └── 📄 CrmWebArcheonzero.csproj       # Project file
 ```
 # ⚡ Key Features
+```
 Feature	Description
 Authentication	Login/Logout, 4 roles (Admin, SuperManager, Manager, User)
 Clients	CRUD, search, status filter, recycle bin
@@ -123,6 +130,7 @@ Notes	Quick client notes
 Interactions	Calls, emails, meetings
 Dashboard	Status statistics
 Export	Excel (EPPlus), PDF (QuestPDF)
+```
 # 🚀 Running
 bash
 
@@ -134,6 +142,10 @@ dotnet run
 Demo access:
 Login: admin
 Password: admin123
+## 📄 License
+
+This project was created for personal use and learning.  
+Distribution and commercial use are permitted only with the author's permission.
 # 🙏 Acknowledgments
 
 Inspiration and support — Oracle Zero.

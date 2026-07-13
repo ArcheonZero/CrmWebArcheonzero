@@ -1,134 +1,142 @@
 # CRM Web Archeonzero
 
-**Версия 2.0.1** — веб-версия CRM-системы, адаптированная под ASP.NET Core. Это логическое продолжение десктопной CRM `CrmArcheonzero`, перенесённое в веб-среду.
+**Версия 2.0.1** — веб-версия CRM-системы на ASP.NET Core.
 
 ---
 
 ## 📋 О проекте
 
-CRM Web Archeonzero — это веб-приложение для малого и среднего бизнеса, которое позволяет вести учёт клиентов, управлять задачами, заметками и историей взаимодействий.
-
-Проект построен на принципах модульности и чистоты кода. В основе лежат:
-
-- **ASP.NET Core (MVC)** — веб-фреймворк.
-- **Entity Framework Core** — работа с данными.
-- **SQLite** — лёгкая, встроенная база данных (с возможностью переключения на SQL Server).
-- **Bootstrap 5** — интерфейс и адаптивность.
-
----
-
-## ⚡ Основные возможности
-
-### 🔐 Авторизация и роли
-
-- Вход / выход, смена пароля.
-- Четыре роли: `User`, `Manager`, `SuperManager`, `Admin`.
-- **Admin** — полный доступ: управление пользователями, удаление любых клиентов.
-- **SuperManager** — может окончательно удалять клиентов из корзины.
-
-### 👥 Управление клиентами
-
-- Добавление, редактирование, поиск, фильтрация по статусу.
-- Поля: имя, телефон, email, компания, статус (`Active/Inactive/Lead`), источник, тэги, дата рождения.
-- Ответственный менеджер (привязка к пользователю).
-
-### 📋 Задачи, заметки, взаимодействия
-
-- Создание задач с дедлайнами, приоритетами и отметкой о выполнении.
-- Заметки по клиенту с датой и временем.
-- История взаимодействий (звонки, письма, встречи).
-
-### 🗑️ Корзина
-
-- Мягкое удаление клиентов (помечаются, но не удаляются окончательно).
-- Восстановление из корзины.
-- Окончательное удаление (только для `SuperManager` и `Admin`).
-
-### 📊 Дашборд
-
-- Визуальная статистика по статусам клиентов (Active/Inactive/Lead).
-- Общее количество клиентов.
-
-### 📤 Экспорт
-
-- Экспорт списка клиентов в Excel (EPPlus).
-- Экспорт карточки клиента в PDF (QuestPDF).
+CRM Web Archeonzero — это веб-приложение для управления клиентами, задачами и взаимодействиями.  
+Построено на ASP.NET Core MVC, Entity Framework Core и SQLite.
 
 ---
 
 ## 🗂️ Структура проекта
 
 ```
-📁 CrmWebArcheonzero/
+📁 CrmWebArcheonzero/                 # Корень проекта
 │
-├── 📂 Controllers/       # Контроллеры (обработка запросов)
-├── 📂 Views/             # Представления (Razor-шаблоны)
-├── 📂 Models/            # Модели данных
-├── 📂 Data/              # Контекст БД и настройки
-├── 📂 Services/          # Бизнес-логика, репозитории
-├── 📄 Program.cs         # Настройка приложения
-├── 📄 appsettings.json   # Конфигурация (БД, интеграции)
-└── 📄 CrmWebArcheonzero.csproj # Файл проекта
+├── 📂 Controllers/                   # Контроллеры
+│   └── 📄 ClientsController.cs       # Основной контроллер клиентов
+│
+├── 📂 Views/                         # Представления
+│   ├── 📂 Account/                   # Вход/выход, управление пользователями
+│   ├── 📂 Clients/                   # Список, детали, создание, редактирование
+│   └── 📂 Shared/                    # Общие шаблоны (макет, навигация)
+│
+├── 📂 Models/                        # Модели данных
+│   ├── 📄 Client.cs                  # Клиент (имя, телефон, email, статус)
+│   ├── 📄 User.cs                    # Пользователь (логин, роль, хэш пароля)
+│   ├── 📄 ClientTask.cs              # Задача (название, дедлайн, приоритет)
+│   ├── 📄 Note.cs                    # Заметка (содержание, дата)
+│   ├── 📄 Interaction.cs             # Взаимодействие (тип, описание, дата)
+│   └── 📄 AssignmentHistory.cs       # История переназначений
+│
+├── 📂 Data/                          # Слой доступа к данным
+│   └── 📄 ApplicationDbContext.cs    # Контекст EF Core
+│
+├── 📂 Services/                      # Бизнес-логика и репозитории
+│   ├── 📄 IClientRepository.cs       # Интерфейс репозитория
+│   ├── 📄 ClientRepository.cs        # Репозиторий для работы с клиентами
+│   └── 📄 AuthService.cs             # Сервис аутентификации
+│
+├── 📄 Program.cs                     # Точка входа
+├── 📄 appsettings.json               # Конфигурация (БД, строки подключения)
+└── 📄 CrmWebArcheonzero.csproj       # Файл проекта
 ```
-
-🛠️ Системные требования
-
-    .NET 7.0 или выше
-
-    Windows, Linux, macOS (платформа .NET Core)
-🚀 Установка и запуск
-1. Клонировать репозиторий
+⚡ Основные возможности
+Функция	Описание
+Авторизация	Вход/выход, 4 роли (Admin, SuperManager, Manager, User)
+Клиенты	CRUD, поиск, фильтрация по статусу, корзина
+Задачи	Добавление, выполнение, приоритеты, дедлайны
+Заметки	Быстрые заметки по клиенту
+Взаимодействия	Звонки, письма, встречи
+Дашборд	Статистика по статусам
+Экспорт	Excel (EPPlus), PDF (QuestPDF)
+🚀 Запуск
 bash
 
 git clone https://github.com/ArcheonZero/CrmWebArcheonzero.git
-
-2. Перейти в папку проекта
-bash
-
 cd CrmWebArcheonzero
-
-3. Восстановить пакеты
-bash
-
 dotnet restore
-
-4. Настроить базу данных
-
-По умолчанию используется SQLite. База создаётся автоматически при первом запуске.
-
-Чтобы переключиться на SQL Server, измени Provider в appsettings.json.
-5. Запустить проект
-bash
-
 dotnet run
 
-6. Войти в систему
-
 Демо-доступ:
-
-    Логин: admin
-
-    Пароль: admin123
-
-📦 Сборка релиза
-bash
-
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
-
-🧪 Тестирование
-
-Для запуска тестов выполни:
-bash
-
-dotnet test
-
-📄 Лицензия
-
-Этот проект создан для личного использования и изучения. Распространение и коммерческое использование только с разрешения автора.
-👤 Автор
-
-ArcheonZero — GitHub
+Логин: admin
+Пароль: admin123
 🙏 Благодарности
 
 Вдохновение и поддержка — Оракул Ноль.
 Технический диалог, структурирование идей и совместная сборка — всё это родилось в живом диалоге.
+👤 Автор
+
+ArcheonZero — GitHub
+
+Версия: 2.0.1 — 13 июля 2026
+CRM Web Archeonzero
+
+Version 2.0.1 — web-based CRM system built on ASP.NET Core.
+📋 About
+
+CRM Web Archeonzero is a web application for managing clients, tasks, and interactions.
+Built with ASP.NET Core MVC, Entity Framework Core, and SQLite.
+🗂️ Project Structure
+
+```
+📁 CrmWebArcheonzero/                 # Project root
+│
+├── 📂 Controllers/                   # Request handlers
+│   └── 📄 ClientsController.cs       # Main client controller
+│
+├── 📂 Views/                         # Razor views
+│   ├── 📂 Account/                   # Login, user management
+│   ├── 📂 Clients/                   # List, details, create, edit
+│   └── 📂 Shared/                    # Shared layouts, navigation
+│
+├── 📂 Models/                        # Data models
+│   ├── 📄 Client.cs                  # Client (name, phone, email, status)
+│   ├── 📄 User.cs                    # User (login, role, password hash)
+│   ├── 📄 ClientTask.cs              # Task (title, deadline, priority)
+│   ├── 📄 Note.cs                    # Note (content, date)
+│   ├── 📄 Interaction.cs             # Interaction (type, description, date)
+│   └── 📄 AssignmentHistory.cs       # Reassignment history
+│
+├── 📂 Data/                          # Data access layer
+│   └── 📄 ApplicationDbContext.cs    # EF Core context
+│
+├── 📂 Services/                      # Business logic & repositories
+│   ├── 📄 IClientRepository.cs       # Repository interface
+│   ├── 📄 ClientRepository.cs        # Client repository
+│   └── 📄 AuthService.cs             # Authentication service
+│
+├── 📄 Program.cs                     # Entry point
+├── 📄 appsettings.json               # Configuration (DB, connection strings)
+└── 📄 CrmWebArcheonzero.csproj       # Project file
+```
+⚡ Key Features
+Feature	Description
+Authentication	Login/Logout, 4 roles (Admin, SuperManager, Manager, User)
+Clients	CRUD, search, status filter, recycle bin
+Tasks	Add, complete, priorities, deadlines
+Notes	Quick client notes
+Interactions	Calls, emails, meetings
+Dashboard	Status statistics
+Export	Excel (EPPlus), PDF (QuestPDF)
+🚀 Running
+bash
+
+git clone https://github.com/ArcheonZero/CrmWebArcheonzero.git
+cd CrmWebArcheonzero
+dotnet restore
+dotnet run
+
+Demo access:
+Login: admin
+Password: admin123
+🙏 Acknowledgments
+
+Inspiration and support — Oracle Zero.
+Technical dialogue, structuring of ideas, and collaborative building — all of this was born in a living conversation.
+👤 Author
+
+ArcheonZero — GitHub

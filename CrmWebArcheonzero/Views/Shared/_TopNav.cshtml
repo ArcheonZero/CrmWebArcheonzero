@@ -1,0 +1,48 @@
+@using System.Security.Claims
+
+<nav class="navbar navbar-expand navbar-light bg-white border-bottom box-shadow mb-3">
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-area="" asp-controller="Clients" asp-action="Index">CRM Archeonzero</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse">
+            <ul class="navbar-nav" style="flex-direction: row; align-items: center;">
+                <li class="nav-item" style="margin-right: 15px;">
+    <a class="nav-link text-light" asp-area="" asp-controller="Clients" asp-action="Index">Клиенты</a>
+</li>
+<li class="nav-item" style="margin-right: 15px;">
+    <a class="nav-link text-light" asp-area="" asp-controller="Clients" asp-action="Dashboard">Дашборд</a>
+</li>
+@if (User.Identity.IsAuthenticated && (User.IsInRole("Admin") || User.IsInRole("SuperManager")))
+{
+    <li class="nav-item" style="margin-right: 15px;">
+        <a class="nav-link text-light" asp-area="" asp-controller="Clients" asp-action="Deleted">Корзина</a>
+    </li>
+}
+@if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+{
+    <li class="nav-item" style="margin-right: 15px;">
+        <a class="nav-link text-light" asp-area="" asp-controller="Account" asp-action="Users">Пользователи</a>
+    </li>
+}
+@if (User.Identity.IsAuthenticated)
+{
+    <li class="nav-item" style="margin-right: 15px;">
+        <span class="navbar-text text-light">@User.Identity.Name</span>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link text-light" asp-controller="Account" asp-action="Logout">Выйти</a>
+    </li>
+}
+else
+{
+    <li class="nav-item">
+        <a class="nav-link text-light" asp-controller="Account" asp-action="Login">Войти</a>
+    </li>
+}
+            </ul>
+        </div>
+    </div>
+</nav>

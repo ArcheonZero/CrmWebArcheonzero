@@ -1,0 +1,273 @@
+/* === ГЛОБАЛЬНЫЕ ЦВЕТА === */
+:root {
+    --primary: #1A2B6B; /* глубокий синий */
+    --primary-light: #3A5FBF;
+    --gold: #D4AF37;
+    --gold-light: #F2D980;
+    --bg-dark: #0B132B;
+    --bg-card: #1C2D4A;
+    --bg-body: #0F1A2E;
+    --text-light: #E6EDF5;
+    --text-muted: #A0B8D0;
+    --border-glow: rgba(212, 175, 55, 0.3);
+    --shadow-glow: 0 0 25px rgba(212, 175, 55, 0.05);
+}
+
+body {
+    background-color: var(--bg-body);
+    color: var(--text-light);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+}
+
+/* === ШАПКА (NAV) === */
+.navbar {
+    background: linear-gradient(90deg, #0D1B3A, #1A2B6B) !important;
+    border-bottom: 2px solid var(--gold) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    padding: 0.75rem 1rem;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: var(--gold) !important;
+    font-size: 1.4rem;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+}
+
+.nav-link {
+    color: var(--text-light) !important;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: 0.2s;
+}
+
+    .nav-link:hover {
+        background: rgba(212, 175, 55, 0.15);
+        color: var(--gold) !important;
+    }
+
+.navbar-text {
+    color: var(--text-light) !important;
+}
+
+/* === КАРТОЧКИ И БЛОКИ === */
+.card {
+    background: var(--bg-card);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 16px;
+    box-shadow: var(--shadow-glow);
+    color: var(--text-light);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.card-title {
+    color: var(--gold-light);
+    font-weight: 600;
+}
+
+/* === КНОПКИ === */
+.btn-primary {
+    background: linear-gradient(135deg, #2A4B8C, #1A2B6B);
+    border: none;
+    color: white;
+    font-weight: 600;
+    padding: 0.5rem 1.25rem;
+    border-radius: 8px;
+    transition: 0.2s;
+    box-shadow: 0 2px 8px rgba(26, 43, 107, 0.4);
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #3A5FBF, #2A4B8C);
+        box-shadow: 0 4px 14px rgba(26, 43, 107, 0.6);
+        transform: translateY(-1px);
+    }
+
+.btn-success {
+    background: linear-gradient(135deg, #1D7A4F, #0F5A3A);
+    border: none;
+    color: white;
+}
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #2A9A6A, #1D7A4F);
+    }
+
+.btn-warning {
+    background: var(--gold);
+    border: none;
+    color: #0B132B;
+    font-weight: 600;
+}
+
+    .btn-warning:hover {
+        background: var(--gold-light);
+        color: #0B132B;
+    }
+
+.btn-danger {
+    background: linear-gradient(135deg, #B22234, #8B1A1A);
+    border: none;
+    color: white;
+}
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #CC3333, #B22234);
+    }
+
+.btn-outline-secondary {
+    border-color: var(--text-muted);
+    color: var(--text-light);
+}
+
+    .btn-outline-secondary:hover {
+        background: rgba(255,255,255,0.05);
+        border-color: var(--gold);
+        color: var(--gold);
+    }
+
+/* === ТАБЛИЦЫ === */
+.table {
+    background: var(--bg-card);
+    border-radius: 16px;
+    overflow: hidden;
+    color: var(--text-light);
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+    .table thead th {
+        background: #13203B;
+        color: var(--gold-light);
+        font-weight: 600;
+        border-bottom: 2px solid var(--gold);
+        padding: 0.75rem 1rem;
+    }
+
+    .table tbody td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .table tbody tr:hover {
+        background: rgba(212, 175, 55, 0.05);
+    }
+
+.badge {
+    padding: 0.4rem 0.8rem;
+    font-weight: 500;
+    border-radius: 40px;
+}
+
+.bg-success {
+    background: #1D7A4F !important;
+}
+
+.bg-warning {
+    background: var(--gold) !important;
+    color: #0B132B !important;
+}
+
+.bg-secondary {
+    background: #3A4A6B !important;
+}
+
+.bg-info {
+    background: #3A5FBF !important;
+}
+
+.bg-danger {
+    background: #B22234 !important;
+}
+
+/* === ФОРМЫ === */
+.form-control, .form-select {
+    background: #13203B;
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    color: var(--text-light);
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+}
+
+    .form-control:focus, .form-select:focus {
+        background: #1A2B4A;
+        border-color: var(--gold);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+        color: white;
+    }
+
+/* === ДАШБОРД === */
+.dashboard-card {
+    background: var(--bg-card);
+    border-left: 4px solid var(--gold);
+    border-radius: 12px;
+    padding: 1.25rem;
+    color: var(--text-light);
+}
+
+    .dashboard-card .number {
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--gold-light);
+    }
+
+/* === ФУТЕР === */
+footer {
+    background: #0A1428;
+    color: var(--text-muted);
+    border-top: 1px solid rgba(212, 175, 55, 0.15);
+    padding: 1.5rem 0;
+    margin-top: 2rem;
+}
+/* === ТЕСТОВЫЙ СТИЛЬ (убери потом) === */
+/* === ЗОЛОТЫЕ КНОПКИ (акцентные) === */
+.btn-gold {
+    background: linear-gradient(135deg, #D4AF37, #B8962A);
+    border: none;
+    color: #0B132B;
+    font-weight: 600;
+}
+
+    .btn-gold:hover {
+        background: linear-gradient(135deg, #E2C455, #D4AF37);
+        color: #0B132B;
+        box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+    }
+
+/* === ЗОЛОТЫЕ ЗАГОЛОВКИ === */
+h1, h2, h3, .gold-title {
+    color: #D4AF37;
+}
+/* === ТАБЛИЦЫ === */
+.table {
+    background: #1C2D4A;
+    border-radius: 16px;
+    overflow: hidden;
+    color: #E6EDF5;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+    .table thead th {
+        background: #13203B;
+        color: #D4AF37;
+        font-weight: 600;
+        border-bottom: 2px solid #D4AF37;
+        padding: 0.75rem 1rem;
+    }
+
+    .table tbody td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .table tbody tr:nth-child(even) {
+        background: #1A2B4A;
+    }
+
+    .table tbody tr:hover {
+        background: rgba(212, 175, 55, 0.08);
+    }

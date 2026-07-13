@@ -1,0 +1,186 @@
+@model CrmWebArcheonzero.Models.Client
+
+@{
+    ViewData["Title"] = "Детали клиента";
+}
+
+<h1>📋 Детали клиента</h1>
+
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">Имя</dt>
+        <dd class="col-sm-10">@Model.Name</dd>
+
+        <dt class="col-sm-2">Телефон</dt>
+        <dd class="col-sm-10">@Model.Phone</dd>
+
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.Email</dd>
+
+        <dt class="col-sm-2">Компания</dt>
+        <dd class="col-sm-10">@Model.Company</dd>
+
+        <dt class="col-sm-2">Статус</dt>
+        <dd class="col-sm-10">@Model.Status</dd>
+
+        <dt class="col-sm-2">Дата создания</dt>
+        <dd class="col-sm-10">@Model.CreatedAt.ToString("dd.MM.yyyy")</dd>
+
+        <dt class="col-sm-2">Ответственный</dt>
+        <dd class="col-sm-10">@Model.AssignedUser?.FullName</dd>
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">✏️ Редактировать</a>
+    <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
+    <a asp-action="ExportPdf" asp-route-id="@Model.Id" class="btn btn-success">
+    📄 Экспорт в PDF
+</a>
+</div>
+
+<!-- ✅ ЗАДАЧИ -->
+<hr />
+<h3>📌 Задачи</h3>
+
+<form method="post" asp-action="AddTask">
+    <input type="hidden" name="clientId" value="@Model.Id" />
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" name="title" class="form-control" placeholder="Название задачи" required />
+        </div>
+        <div class="col-md-3">
+            <input type="date" name="dueDate" class="form-control" required />
+        </div>
+        <div class="col-md-2">
+            <select name="priority" class="form-select">
+                <option value="Low">Низкий</option>
+                <option value="Medium" selected>Средний</option>
+                <option value="High">Высокий</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary">➕ Добавить</button>
+        </div>
+    </div>
+</form>
+
+<ul class="list-group">
+    @if (ViewBag.Tasks != null && ViewBag.Tasks.Count > 0)
+    {
+        foreach (var task in ViewBag.Tasks)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    @if (task.IsCompleted)
+                    {
+                        <s>@task.Title</s>
+                    }
+                    else
+                    {
+                        <span>@task.Title</span>
+                    }
+                    <span class="badge bg-secondary ms-2">@task.Priority</span>
+                    <span class="badge bg-info ms-2">@task.DueDate.ToString("dd.MM.yyyy")</span>
+                </div>
+                <form method="post" asp-action="ToggleTask" style="display: inline;">
+                    <input type="hidden" name="taskId" value="@task.Id" />
+                    <input type="hidden" name="clientId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-sm @(task.IsCompleted ? "btn-outline-secondary" : "btn-success")">
+                        @(task.IsCompleted ? "↩ Вернуть" : "✅ Выполнить")
+                    </button>
+                </form>
+            </li>
+        }
+    }
+    else
+    {
+        <li class="list-group-item text-muted">Нет задач</li>
+    }
+</ul>
+<!-- ✅ ЗАМЕТКИ -->
+<hr />
+<h3>📝 Заметки</h3>
+
+<form method="post" asp-action="AddNote">
+    <input type="hidden" name="clientId" value="@Model.Id" />
+    <div class="input-group mb-3">
+        <input type="text" name="content" class="form-control" placeholder="Введите заметку..." required />
+        <button type="submit" class="btn btn-primary">➕ Добавить</button>
+    </div>
+</form>
+<!-- ✅ ВЗАИМОДЕЙСТВИЯ -->
+<hr />
+<h3>📞 Взаимодействия</h3>
+
+<form method="post" asp-action="AddInteraction">
+    <input type="hidden" name="clientId" value="@Model.Id" />
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <select name="type" class="form-select" required>
+                <option value="Call">Звонок</option>
+                <option value="Email">Письмо</option>
+                <option value="Meeting">Встреча</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <input type="text" name="description" class="form-control" placeholder="Описание" required />
+        </div>
+        <div class="col-md-3">
+            <input type="datetime-local" name="date" class="form-control" required />
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary">➕ Добавить</button>
+        </div>
+    </div>
+</form>
+
+<ul class="list-group">
+    @if (ViewBag.Interactions != null && ViewBag.Interactions.Count > 0)
+    {
+        foreach (var interaction in ViewBag.Interactions)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="badge @(interaction.Type == "Call" ? "bg-success" : interaction.Type == "Email" ? "bg-info" : "bg-warning")">
+                        @interaction.Type
+                    </span>
+                    @interaction.Description
+                    <span class="badge bg-secondary ms-2">@interaction.Date.ToString("dd.MM.yyyy HH:mm")</span>
+                </div>
+                <form method="post" asp-action="DeleteInteraction" style="display: inline;">
+                    <input type="hidden" name="interactionId" value="@interaction.Id" />
+                    <input type="hidden" name="clientId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger">🗑 Удалить</button>
+                </form>
+            </li>
+        }
+    }
+    else
+    {
+        <li class="list-group-item text-muted">Нет взаимодействий</li>
+    }
+</ul>
+<ul class="list-group">
+    @if (ViewBag.Notes != null && ViewBag.Notes.Count > 0)
+    {
+        foreach (var note in ViewBag.Notes)
+        {
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    @note.Content
+                    <span class="badge bg-secondary ms-2">@note.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                </div>
+                <form method="post" asp-action="DeleteNote" style="display: inline;">
+                    <input type="hidden" name="noteId" value="@note.Id" />
+                    <input type="hidden" name="clientId" value="@Model.Id" />
+                    <button type="submit" class="btn btn-sm btn-danger">🗑 Удалить</button>
+                </form>
+            </li>
+        }
+    }
+    else
+    {
+        <li class="list-group-item text-muted">Нет заметок</li>
+    }
+</ul>

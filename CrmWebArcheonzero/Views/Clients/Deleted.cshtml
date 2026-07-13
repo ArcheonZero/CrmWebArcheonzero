@@ -1,0 +1,35 @@
+@model List<CrmWebArcheonzero.Models.Client>
+
+@{
+    ViewData["Title"] = "Корзина";
+}
+
+<h1>🗑 Корзина (удалённые клиенты)</h1>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Имя</th>
+            <th>Телефон</th>
+            <th>Email</th>
+            <th>Удалён</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var client in Model)
+        {
+            <tr>
+                <td>@client.Name</td>
+                <td>@client.Phone</td>
+                <td>@client.Email</td>
+                <td>@client.DeletedAt?.ToString("dd.MM.yyyy HH:mm")</td>
+                <td>
+                    <a asp-action="Restore" asp-route-id="@client.Id" class="btn btn-sm btn-success">Восстановить</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Назад к списку</a>

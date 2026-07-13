@@ -1,0 +1,87 @@
+@model Dictionary<string, int>
+
+@{
+    ViewData["Title"] = "Дашборд";
+}
+
+<h1 class="mb-4" style="color: #D4AF37;">📊 Дашборд</h1>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary" style="border-radius: 16px; padding: 1.5rem;">
+            <div class="card-body">
+                <h5 class="card-title" style="color: #E6EDF5;">Всего</h5>
+                <p class="card-text display-6 fw-bold">@Model["Total"]</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success" style="border-radius: 16px; padding: 1.5rem;">
+            <div class="card-body">
+                <h5 class="card-title" style="color: #E6EDF5;">Active</h5>
+                <p class="card-text display-6 fw-bold">@Model["Active"]</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning" style="border-radius: 16px; padding: 1.5rem;">
+            <div class="card-body">
+                <h5 class="card-title" style="color: #0B132B;">Lead</h5>
+                <p class="card-text display-6 fw-bold" style="color: #0B132B;">@Model["Lead"]</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger" style="border-radius: 16px; padding: 1.5rem;">
+            <div class="card-body">
+                <h5 class="card-title" style="color: #E6EDF5;">Inactive</h5>
+                <p class="card-text display-6 fw-bold">@Model["Inactive"]</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card" style="background: #1C2D4A; border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 16px; padding: 1.5rem;">
+            <div class="card-body">
+                <h5 class="card-title" style="color: #D4AF37;">Распределение по статусам</h5>
+                <canvas id="statusChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('statusChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Active', 'Inactive', 'Lead'],
+                datasets: [{
+                    label: 'Клиенты',
+                    data: [@Model["Active"], @Model["Inactive"], @Model["Lead"]],
+                    backgroundColor: ['#1D7A4F', '#B22234', '#D4AF37']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stepSize: 1,
+                        ticks: { color: '#A0B8D0' }
+                    },
+                    x: {
+                        ticks: { color: '#A0B8D0' }
+                    }
+                }
+            }
+        });
+    </script>
+}

@@ -1,0 +1,75 @@
+@model List<CrmWebArcheonzero.Models.Client>
+@using System.Security.Claims
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div>
+        <span>Пользователь: @User.Identity.Name</span>
+        <span class="badge bg-info">@User.FindFirst(ClaimTypes.Role)?.Value</span>
+    </div>
+}
+
+<h1>Список клиентов</h1>
+
+<form method="get" asp-action="Index" class="mb-3">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="input-group">
+                <input type="text" name="search" class="form-control" placeholder="Поиск по имени, email, телефону или компании" value="@ViewBag.Search" />
+                <button type="submit" class="btn btn-primary">🔍 Найти</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Сбросить</a>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <select name="status" class="form-select" onchange="this.form.submit()">
+                <option value="">Все статусы</option>
+                <option value="Active" selected="@(ViewBag.CurrentStatus == "Active" ? "selected" : null)">Active</option>
+                <option value="Inactive" selected="@(ViewBag.CurrentStatus == "Inactive" ? "selected" : null)">Inactive</option>
+                <option value="Lead" selected="@(ViewBag.CurrentStatus == "Lead" ? "selected" : null)">Lead</option>
+            </select>
+        </div>
+        <div class="col-md-4 text-end">
+            <a asp-action="ExportExcel"
+               asp-route-search="@ViewBag.Search"
+               asp-route-status="@ViewBag.CurrentStatus"
+               class="btn btn-success">
+                📥 Экспорт в Excel
+            </a>
+            <a asp-action="Create" class="btn btn-primary">➕ Добавить клиента</a>
+        </div>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Телефон</th>
+            <th>Email</th>
+            <th>Статус</th>
+            <th>Компания</th>
+            <th>Ответственный</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var client in Model)
+        {
+            <tr>
+                <td>@client.Id</td>
+                <td>@client.Name</td>
+                <td>@client.Phone</td>
+                <td>@client.Email</td>
+                <td><span class="badge bg-@(client.Status == "Active" ? "success" : client.Status == "Lead" ? "warning" : "secondary")">@client.Status</span></td>
+                <td>@client.Company</td>
+                <td>@client.AssignedUser?.FullName</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@client.Id" class="btn btn-sm btn-info">📋</a>
+                    <a asp-action="Edit" asp-route-id="@client.Id" class="btn btn-sm btn-warning">✏️</a>
+                    <a asp-action="Delete" asp-route-id="@client.Id" class="btn btn-sm btn-danger">🗑</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

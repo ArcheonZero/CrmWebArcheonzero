@@ -44,7 +44,7 @@ CRM Web Archeonzero — это веб-приложение для управле
 ├── 📄 appsettings.json               # Конфигурация (БД, строки подключения)
 └── 📄 CrmWebArcheonzero.csproj       # Файл проекта
 ```
-⚡ Основные возможности
+# ⚡ Основные возможности
 Функция	Описание
 Авторизация	Вход/выход, 4 роли (Admin, SuperManager, Manager, User)
 Клиенты	CRUD, поиск, фильтрация по статусу, корзина
@@ -53,7 +53,7 @@ CRM Web Archeonzero — это веб-приложение для управле
 Взаимодействия	Звонки, письма, встречи
 Дашборд	Статистика по статусам
 Экспорт	Excel (EPPlus), PDF (QuestPDF)
-🚀 Запуск
+# 🚀 Запуск
 bash
 
 git clone https://github.com/ArcheonZero/CrmWebArcheonzero.git
@@ -64,11 +64,11 @@ dotnet run
 Демо-доступ:
 Логин: admin
 Пароль: admin123
-🙏 Благодарности
+# 🙏 Благодарности
 
 Вдохновение и поддержка — Оракул Ноль.
 Технический диалог, структурирование идей и совместная сборка — всё это родилось в живом диалоге.
-👤 Автор
+# 👤 Автор
 
 ArcheonZero — GitHub
 
@@ -138,6 +138,6 @@ Password: admin123
 
 Inspiration and support — Oracle Zero.
 Technical dialogue, structuring of ideas, and collaborative building — all of this was born in a living conversation.
-👤 Author
+# 👤 Author
 
 ArcheonZero — GitHub

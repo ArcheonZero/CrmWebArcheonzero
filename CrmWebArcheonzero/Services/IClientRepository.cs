@@ -32,6 +32,9 @@ namespace CrmWebArcheonzero.Services
 
         Task<Interaction?> GetInteractionByIdAsync(int id);
         Task UpdateInteractionAsync(Interaction interaction);
+        Task<List<ChatMessage>> GetChatMessagesAsync();
+        Task AddChatMessageAsync(ChatMessage message);
+        Task<User?> GetUserByIdAsync(int id);
 
     }
 }

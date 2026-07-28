@@ -241,5 +241,25 @@ namespace CrmWebArcheonzero.Services
             _context.Interactions.Update(interaction);
             await _context.SaveChangesAsync();
         }
+        public async Task<List<ChatMessage>> GetChatMessagesAsync()
+        {
+            return await _context.ChatMessages
+                .Include(m => m.User) // ← добавить это
+                .OrderByDescending(m => m.SentAt)
+                .Take(100)
+                .ToListAsync();
+        }
+
+        public async Task AddChatMessageAsync(ChatMessage message)
+        {
+            message.SentAt = DateTime.Now; // ← замени CreatedAt на SentAt
+            _context.ChatMessages.Add(message);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<User?> GetUserByIdAsync(int id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        }
     }
 }

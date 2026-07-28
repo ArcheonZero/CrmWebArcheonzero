@@ -1,0 +1,19 @@
+@model CrmWebArcheonzero.Models.Note
+
+<div class="modal-header">
+    <h5 class="modal-title">✏️ Редактировать заметку</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<form asp-action="EditNote">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="modal-body">
+        <div class="form-group">
+            <label for="content" class="form-label">Текст заметки</label>
+            <input type="text" name="content" id="content" class="form-control" value="@Model.Content" required />
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+    </div>
+</form>

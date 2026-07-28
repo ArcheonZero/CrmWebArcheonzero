@@ -1,5 +1,33 @@
 @model Dictionary<string, int>
+@using System.Security.Claims
 
+@if (User.Identity.IsAuthenticated)
+{
+    <div>
+        <span>Пользователь: @User.Identity.Name</span>
+        <span class="badge bg-info">@User.FindFirst(ClaimTypes.Role)?.Value</span>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["ImportErrors"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>Ошибки импорта:</strong>
+        <ul>
+            @foreach (var error in TempData["ImportErrors"].ToString().Split("<br />", StringSplitOptions.RemoveEmptyEntries))
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
 @{
     ViewData["Title"] = "Дашборд";
 }

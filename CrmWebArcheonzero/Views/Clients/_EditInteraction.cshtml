@@ -1,0 +1,31 @@
+@model CrmWebArcheonzero.Models.Interaction
+
+<div class="modal-header">
+    <h5 class="modal-title">✏️ Редактировать взаимодействие</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<form asp-action="EditInteraction">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="modal-body">
+        <div class="form-group mb-2">
+            <label for="type" class="form-label">Тип</label>
+            <select name="type" id="type" class="form-select">
+                <option value="Call" selected="@(Model.Type == "Call")">Звонок</option>
+                <option value="Email" selected="@(Model.Type == "Email")">Письмо</option>
+                <option value="Meeting" selected="@(Model.Type == "Meeting")">Встреча</option>
+            </select>
+        </div>
+        <div class="form-group mb-2">
+            <label for="description" class="form-label">Описание</label>
+            <input type="text" name="description" id="description" class="form-control" value="@Model.Description" required />
+        </div>
+        <div class="form-group mb-2">
+            <label for="date" class="form-label">Дата и время</label>
+            <input type="datetime-local" name="date" id="date" class="form-control" value="@Model.Date.ToString("yyyy-MM-ddTHH:mm")" required />
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+        <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+    </div>
+</form>

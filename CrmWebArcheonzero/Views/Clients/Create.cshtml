@@ -1,5 +1,33 @@
 @model CrmWebArcheonzero.Models.Client
+@using System.Security.Claims
 
+@if (User.Identity.IsAuthenticated)
+{
+    <div>
+        <span>Пользователь: @User.Identity.Name</span>
+        <span class="badge bg-info">@User.FindFirst(ClaimTypes.Role)?.Value</span>
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+@if (TempData["ImportErrors"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>Ошибки импорта:</strong>
+        <ul>
+            @foreach (var error in TempData["ImportErrors"].ToString().Split("<br />", StringSplitOptions.RemoveEmptyEntries))
+            {
+                <li>@error</li>
+            }
+        </ul>
+    </div>
+}
 @{
     ViewData["Title"] = "Добавить клиента";
 }
@@ -42,7 +70,18 @@
         </select>
         <span asp-validation-for="Status" class="text-danger"></span>
     </div>
-
+    <div class="form-group">
+    <label asp-for="Source"></label>
+    <input asp-for="Source" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Tags"></label>
+        <input asp-for="Tags" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Birthday"></label>
+        <input asp-for="Birthday" class="form-control" type="date" />
+    </div>
     <div class="form-group">
         <input type="submit" value="Сохранить" class="btn btn-primary" />
         <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>

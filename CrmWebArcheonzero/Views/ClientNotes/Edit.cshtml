@@ -1,0 +1,13 @@
+@model CrmWebArcheonzero.Models.Note
+
+<h2>✏️ Редактировать заметку</h2>
+
+<form method="post" asp-action="Edit">
+    <input type="hidden" name="id" value="@Model.Id" />
+    <div class="form-group mb-3">
+        <label for="content" class="form-label">Текст заметки</label>
+        <input type="text" name="content" id="content" class="form-control" value="@Model.Content" required />
+    </div>
+    <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+    <a asp-action="Index" asp-route-clientId="@Model.ClientId" class="btn btn-secondary">Отмена</a>
+</form>

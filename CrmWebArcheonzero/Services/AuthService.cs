@@ -13,7 +13,14 @@ namespace CrmWebArcheonzero.Services
         {
             _context = context;
         }
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            if (userId <= 0)
+                return null;
 
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Id == userId);
+        }
         public async Task<User?> LoginAsync(string username, string password)
         {
             var user = await _context.Users

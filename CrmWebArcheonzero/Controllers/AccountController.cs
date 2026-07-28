@@ -22,6 +22,8 @@ namespace CrmWebArcheonzero.Controllers
             return View();
         }
 
+
+
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password, string returnUrl = "/Clients")
         {
@@ -60,15 +62,95 @@ namespace CrmWebArcheonzero.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ChangeRole(int userId, string role)
         {
-            await _authService.ChangeRoleAsync(userId, role);
+            var currentUserId = int.Parse(User.FindFirst("UserId").Value);
+            var currentUser = await _authService.GetUserByIdAsync(currentUserId);
+            var targetUser = await _authService.GetUserByIdAsync(userId);
+
+            if (targetUser == null)
+            {
+                TempData["Error"] = "Пользователь не найден.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            if (userId == currentUserId)
+            {
+                TempData["Error"] = "Вы не можете изменить роль своего аккаунта.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            if (targetUser.Role == "Admin" && currentUser.Role != "Admin")
+            {
+                TempData["Error"] = "Вы не можете изменить роль администратора.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // User не может менять роли
+            if (currentUser.Role == "User")
+            {
+                TempData["Error"] = "У вас нет прав на изменение ролей.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // Manager может назначать только User
+            if (currentUser.Role == "Manager" && role != "User")
+            {
+                TempData["Error"] = "Вы можете назначать только роль User.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // SuperManager может назначать только User и Manager
+            if (currentUser.Role == "SuperManager" && (role != "User" && role != "Manager"))
+            {
+                TempData["Error"] = "Вы можете назначать только роли User и Manager.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            if (currentUser.Role == "Admin")
+            {
+                await _authService.ChangeRoleAsync(userId, role);
+                TempData["Success"] = "Роль пользователя изменена.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            TempData["Error"] = "Недостаточно прав для изменения роли.";
             return RedirectToAction(nameof(Users));
         }
+
 
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> ToggleUserStatus(int userId)
         {
+            var currentUserId = int.Parse(User.FindFirst("UserId").Value);
+            var currentUser = await _authService.GetUserByIdAsync(currentUserId);
+            var targetUser = await _authService.GetUserByIdAsync(userId);
+
+            if (targetUser == null)
+            {
+                TempData["Error"] = "Пользователь не найден.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // Нельзя заблокировать себя
+            if (userId == currentUserId)
+            {
+                TempData["Error"] = "Вы не можете изменить статус своего аккаунта.";
+                return RedirectToAction(nameof(Users));
+            }
+            if (targetUser.Role == "Admin")
+            {
+                TempData["Error"] = "Вы не можете изменить статус другого администратора.";
+                return RedirectToAction(nameof(Users));
+            }
+            // Нельзя заблокировать администратора, если ты не администратор
+            if (targetUser.Role == "Admin" && currentUser.Role != "Admin")
+            {
+                TempData["Error"] = "Вы не можете изменить статус администратора.";
+                return RedirectToAction(nameof(Users));
+            }
+
             await _authService.ToggleUserStatusAsync(userId);
+            TempData["Success"] = $"Статус пользователя {targetUser.FullName} изменён.";
             return RedirectToAction(nameof(Users));
         }
 

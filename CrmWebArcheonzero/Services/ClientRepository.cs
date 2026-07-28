@@ -8,6 +8,35 @@ namespace CrmWebArcheonzero.Services
 {
     public class ClientRepository : IClientRepository
     {
+
+        public async Task<ClientTask?> GetTaskByIdAsync(int id)
+        {
+            return await _context.ClientTasks.FirstOrDefaultAsync(t => t.Id == id);
+        }
+
+        public async Task UpdateTaskAsync(ClientTask task)
+        {
+            _context.ClientTasks.Update(task);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DeleteTaskAsync(int id)
+        {
+            var task = await _context.ClientTasks.FindAsync(id);
+            if (task != null)
+            {
+                _context.ClientTasks.Remove(task);
+                await _context.SaveChangesAsync();
+            }
+        }
+        public async Task<Client?> GetByPhoneOrEmailAsync(string? phone, string? email)
+        {
+            return await _context.Clients
+                .FirstOrDefaultAsync(c =>
+                    (phone != null && c.Phone == phone) ||
+                    (email != null && c.Email == email)
+                );
+        }
         private readonly ApplicationDbContext _context;
 
         public ClientRepository(ApplicationDbContext context)
@@ -190,6 +219,27 @@ namespace CrmWebArcheonzero.Services
                 _context.Interactions.Remove(interaction);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task<Note?> GetNoteByIdAsync(int id)
+        {
+            return await _context.Notes.FirstOrDefaultAsync(n => n.Id == id);
+        }
+
+        public async Task UpdateNoteAsync(Note note)
+        {
+            _context.Notes.Update(note);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<Interaction?> GetInteractionByIdAsync(int id)
+        {
+            return await _context.Interactions.FirstOrDefaultAsync(i => i.Id == id);
+        }
+
+        public async Task UpdateInteractionAsync(Interaction interaction)
+        {
+            _context.Interactions.Update(interaction);
+            await _context.SaveChangesAsync();
         }
     }
 }

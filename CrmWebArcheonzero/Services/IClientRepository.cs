@@ -4,6 +4,7 @@ namespace CrmWebArcheonzero.Services
 {
     public interface IClientRepository
     {
+        Task<Client?> GetByPhoneOrEmailAsync(string? phone, string? email);
         Task<List<Client>> GetAllAsync();
         Task<Client?> GetByIdAsync(int id);
         Task AddAsync(Client client);
@@ -23,5 +24,14 @@ namespace CrmWebArcheonzero.Services
         Task<List<Interaction>> GetInteractionsByClientAsync(int clientId);
         Task AddInteractionAsync(Interaction interaction);
         Task DeleteInteractionAsync(int interactionId);
+		Task<ClientTask?> GetTaskByIdAsync(int id);
+		Task UpdateTaskAsync(ClientTask task);
+		Task DeleteTaskAsync(int id);
+        Task<Note?> GetNoteByIdAsync(int id);
+        Task UpdateNoteAsync(Note note);
+
+        Task<Interaction?> GetInteractionByIdAsync(int id);
+        Task UpdateInteractionAsync(Interaction interaction);
+
     }
 }

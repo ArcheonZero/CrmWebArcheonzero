@@ -12,7 +12,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // 2. Регистрируем репозиторий
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
-
+builder.Services.AddScoped<ExportService>();
 // 0. Добавляем Авторизацию
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

@@ -1,186 +1,293 @@
 @model CrmWebArcheonzero.Models.Client
 
 @{
-    ViewData["Title"] = "Детали клиента";
+    ViewData["Title"] = "Карточка клиента";
 }
 
-<h1>📋 Детали клиента</h1>
+<div class="container mt-4">
+    <h2>Карточка клиента</h2>
+    <hr />
 
-<div>
-    <dl class="row">
-        <dt class="col-sm-2">Имя</dt>
-        <dd class="col-sm-10">@Model.Name</dd>
+    <div class="row">
+        <div class="col-md-6">
+            <dl class="row">
+                <dt class="col-sm-4">Имя</dt>
+                <dd class="col-sm-8">@Model.Name</dd>
 
-        <dt class="col-sm-2">Телефон</dt>
-        <dd class="col-sm-10">@Model.Phone</dd>
+                <dt class="col-sm-4">Телефон</dt>
+                <dd class="col-sm-8">@Model.Phone</dd>
 
-        <dt class="col-sm-2">Email</dt>
-        <dd class="col-sm-10">@Model.Email</dd>
+                <dt class="col-sm-4">Email</dt>
+                <dd class="col-sm-8">@Model.Email</dd>
 
-        <dt class="col-sm-2">Компания</dt>
-        <dd class="col-sm-10">@Model.Company</dd>
+                <dt class="col-sm-4">Компания</dt>
+                <dd class="col-sm-8">@Model.Company</dd>
 
-        <dt class="col-sm-2">Статус</dt>
-        <dd class="col-sm-10">@Model.Status</dd>
+                <dt class="col-sm-4">Статус</dt>
+                <dd class="col-sm-8">@Model.Status</dd>
 
-        <dt class="col-sm-2">Дата создания</dt>
-        <dd class="col-sm-10">@Model.CreatedAt.ToString("dd.MM.yyyy")</dd>
+                <dt class="col-sm-4">Источник</dt>
+                <dd class="col-sm-8">@Model.Source</dd>
 
-        <dt class="col-sm-2">Ответственный</dt>
-        <dd class="col-sm-10">@Model.AssignedUser?.FullName</dd>
-    </dl>
+                <dt class="col-sm-4">Теги</dt>
+                <dd class="col-sm-8">@Model.Tags</dd>
+
+                <dt class="col-sm-4">Дата рождения</dt>
+                <dd class="col-sm-8">@(Model.Birthday?.ToString("dd.MM.yyyy") ?? "-")</dd>
+
+                <dt class="col-sm-4">Дата создания</dt>
+                <dd class="col-sm-8">@Model.CreatedAt.ToString("dd.MM.yyyy")</dd>
+
+                <dt class="col-sm-4">Последний контакт</dt>
+                <dd class="col-sm-8">@(Model.LastContact?.ToString("dd.MM.yyyy") ?? "-")</dd>
+
+                <dt class="col-sm-4">Примечания</dt>
+                <dd class="col-sm-8">@Model.Notes</dd>
+            </dl>
+
+            <div class="mt-3">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">✏️ Редактировать</a>
+                <a asp-action="Index" class="btn btn-secondary">⬅ Назад к списку</a>
+                <a asp-controller="Export" asp-action="Pdf" asp-route-id="@Model.Id" class="btn btn-success">📄 PDF</a>
+                <a asp-controller="Export" asp-action="Txt" asp-route-id="@Model.Id" class="btn btn-secondary">📄 TXT</a>
+                <a asp-controller="Export" asp-action="Docx" asp-route-id="@Model.Id" class="btn btn-secondary">📄 DOCX</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ✅ ЗАДАЧИ -->
+    <!-- ============================================================ -->
+    <hr />
+    <h3>📌 Задачи</h3>
+
+    <form method="post" asp-action="AddTask">
+        <input type="hidden" name="clientId" value="@Model.Id" />
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" name="title" class="form-control" placeholder="Название задачи" required />
+            </div>
+            <div class="col-md-3">
+                <input type="date" name="dueDate" class="form-control" required />
+            </div>
+            <div class="col-md-2">
+                <select name="priority" class="form-select">
+                    <option value="Low">Низкий</option>
+                    <option value="Medium" selected>Средний</option>
+                    <option value="High">Высокий</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">➕ Добавить</button>
+            </div>
+        </div>
+    </form>
+
+    <ul class="list-group">
+        @if (ViewBag.Tasks != null && ViewBag.Tasks.Count > 0)
+        {
+            foreach (var task in ViewBag.Tasks)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        @if (task.IsCompleted)
+                        {
+                            <s>@task.Title</s>
+                        }
+                        else
+                        {
+                            <span>@task.Title</span>
+                        }
+                        <span class="badge bg-secondary ms-2">@task.Priority</span>
+                        <span class="badge bg-info ms-2">@task.DueDate.ToString("dd.MM.yyyy")</span>
+                    </div>
+                    <form method="post" asp-action="ToggleTask" style="display: inline;">
+                        <input type="hidden" name="taskId" value="@task.Id" />
+                        <input type="hidden" name="clientId" value="@Model.Id" />
+                        <button type="submit" class="btn btn-sm @(task.IsCompleted ? "btn-outline-secondary" : "btn-success")">
+                            @(task.IsCompleted ? "↩ Вернуть" : "✅ Выполнить")
+                        </button>
+                    </form>
+                </li>
+            }
+        }
+        else
+        {
+            <li class="list-group-item text-muted">Нет задач</li>
+        }
+    </ul>
+
+    <!-- ============================================================ -->
+    <!-- ✅ ЗАМЕТКИ -->
+    <!-- ============================================================ -->
+    <hr />
+    <h3>📝 Заметки</h3>
+
+    <form method="post" asp-action="AddNote">
+<a asp-controller="ClientNotes" asp-action="Index" asp-route-clientId="@Model.Id" class="btn btn-info">📝 Заметки</a>
+    </form>
+
+    <ul class="list-group">
+        @if (ViewBag.Notes != null && ViewBag.Notes.Count > 0)
+        {
+            foreach (var note in ViewBag.Notes)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>@note.Content</span>
+                    <span class="badge bg-secondary">@note.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editNoteModal"
+                                data-id="@note.Id" data-content="@note.Content">
+                            ✏️
+                        </button>
+                        <form method="post" asp-action="DeleteNote" style="display: inline;">
+                            <input type="hidden" name="noteId" value="@note.Id" />
+                            <input type="hidden" name="clientId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                        </form>
+                    </div>
+                </li>
+            }
+        }
+        else
+        {
+            <li class="list-group-item text-muted">Нет заметок</li>
+        }
+    </ul>
+
+    <!-- ============================================================ -->
+    <!-- ✅ ВЗАИМОДЕЙСТВИЯ -->
+    <!-- ============================================================ -->
+    <hr />
+    <h3>📞 Взаимодействия</h3>
+
+    <form method="post" asp-action="AddInteraction">
+<a asp-controller="ClientInteractions" asp-action="Index" asp-route-clientId="@Model.Id" class="btn btn-info">📞 Взаимодействия</a>
+    </form>
+
+    <ul class="list-group">
+        @if (ViewBag.Interactions != null && ViewBag.Interactions.Count > 0)
+        {
+            foreach (var interaction in ViewBag.Interactions)
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="badge @(interaction.Type == "Call" ? "bg-success" : interaction.Type == "Email" ? "bg-info" : "bg-warning")">
+                            @interaction.Type
+                        </span>
+                        @interaction.Description
+                        <span class="badge bg-secondary ms-2">@interaction.Date.ToString("dd.MM.yyyy HH:mm")</span>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editInteractionModal"
+                                data-id="@interaction.Id" data-type="@interaction.Type" data-description="@interaction.Description" data-date="@interaction.Date.ToString("yyyy-MM-ddTHH:mm")">
+                            ✏️
+                        </button>
+                        <form method="post" asp-action="DeleteInteraction" style="display: inline;">
+                            <input type="hidden" name="interactionId" value="@interaction.Id" />
+                            <input type="hidden" name="clientId" value="@Model.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger">🗑</button>
+                        </form>
+                    </div>
+                </li>
+            }
+        }
+        else
+        {
+            <li class="list-group-item text-muted">Нет взаимодействий</li>
+        }
+    </ul>
 </div>
 
-<div>
-    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">✏️ Редактировать</a>
-    <a asp-action="Index" class="btn btn-secondary">Назад к списку</a>
-    <a asp-action="ExportPdf" asp-route-id="@Model.Id" class="btn btn-success">
-    📄 Экспорт в PDF
-</a>
+<!-- ============================================================ -->
+<!-- МОДАЛЬНОЕ ОКНО: РЕДАКТИРОВАНИЕ ЗАМЕТКИ -->
+<!-- ============================================================ -->
+<div class="modal fade" id="editNoteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="EditNote">
+                <div class="modal-header">
+                    <h5 class="modal-title">✏️ Редактировать заметку</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="editNoteId" />
+                    <div class="form-group">
+                        <label for="editNoteContent">Текст заметки</label>
+                        <input type="text" name="content" id="editNoteContent" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
-<!-- ✅ ЗАДАЧИ -->
-<hr />
-<h3>📌 Задачи</h3>
-
-<form method="post" asp-action="AddTask">
-    <input type="hidden" name="clientId" value="@Model.Id" />
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <input type="text" name="title" class="form-control" placeholder="Название задачи" required />
-        </div>
-        <div class="col-md-3">
-            <input type="date" name="dueDate" class="form-control" required />
-        </div>
-        <div class="col-md-2">
-            <select name="priority" class="form-select">
-                <option value="Low">Низкий</option>
-                <option value="Medium" selected>Средний</option>
-                <option value="High">Высокий</option>
-            </select>
-        </div>
-        <div class="col-md-3">
-            <button type="submit" class="btn btn-primary">➕ Добавить</button>
+<!-- ============================================================ -->
+<!-- МОДАЛЬНОЕ ОКНО: РЕДАКТИРОВАНИЕ ВЗАИМОДЕЙСТВИЯ -->
+<!-- ============================================================ -->
+<div class="modal fade" id="editInteractionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-action="EditInteraction">
+                <div class="modal-header">
+                    <h5 class="modal-title">✏️ Редактировать взаимодействие</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="editInteractionId" />
+                    <div class="form-group mb-2">
+                        <label for="editInteractionType">Тип</label>
+                        <select name="type" id="editInteractionType" class="form-select">
+                            <option value="Call">Звонок</option>
+                            <option value="Email">Письмо</option>
+                            <option value="Meeting">Встреча</option>
+                        </select>
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="editInteractionDescription">Описание</label>
+                        <input type="text" name="description" id="editInteractionDescription" class="form-control" required />
+                    </div>
+                    <div class="form-group mb-2">
+                        <label for="editInteractionDate">Дата и время</label>
+                        <input type="datetime-local" name="date" id="editInteractionDate" class="form-control" required />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+                </div>
+            </form>
         </div>
     </div>
-</form>
+</div>
 
-<ul class="list-group">
-    @if (ViewBag.Tasks != null && ViewBag.Tasks.Count > 0)
-    {
-        foreach (var task in ViewBag.Tasks)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    @if (task.IsCompleted)
-                    {
-                        <s>@task.Title</s>
-                    }
-                    else
-                    {
-                        <span>@task.Title</span>
-                    }
-                    <span class="badge bg-secondary ms-2">@task.Priority</span>
-                    <span class="badge bg-info ms-2">@task.DueDate.ToString("dd.MM.yyyy")</span>
-                </div>
-                <form method="post" asp-action="ToggleTask" style="display: inline;">
-                    <input type="hidden" name="taskId" value="@task.Id" />
-                    <input type="hidden" name="clientId" value="@Model.Id" />
-                    <button type="submit" class="btn btn-sm @(task.IsCompleted ? "btn-outline-secondary" : "btn-success")">
-                        @(task.IsCompleted ? "↩ Вернуть" : "✅ Выполнить")
-                    </button>
-                </form>
-            </li>
-        }
-    }
-    else
-    {
-        <li class="list-group-item text-muted">Нет задач</li>
-    }
-</ul>
-<!-- ✅ ЗАМЕТКИ -->
-<hr />
-<h3>📝 Заметки</h3>
+<!-- ============================================================ -->
+<!-- СКРИПТ ДЛЯ ЗАПОЛНЕНИЯ МОДАЛЬНЫХ ОКОН -->
+<!-- ============================================================ -->
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Заметка
+            var editNoteModal = document.getElementById('editNoteModal');
+            editNoteModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                document.getElementById('editNoteId').value = button.getAttribute('data-id');
+                document.getElementById('editNoteContent').value = button.getAttribute('data-content');
+            });
 
-<form method="post" asp-action="AddNote">
-    <input type="hidden" name="clientId" value="@Model.Id" />
-    <div class="input-group mb-3">
-        <input type="text" name="content" class="form-control" placeholder="Введите заметку..." required />
-        <button type="submit" class="btn btn-primary">➕ Добавить</button>
-    </div>
-</form>
-<!-- ✅ ВЗАИМОДЕЙСТВИЯ -->
-<hr />
-<h3>📞 Взаимодействия</h3>
-
-<form method="post" asp-action="AddInteraction">
-    <input type="hidden" name="clientId" value="@Model.Id" />
-    <div class="row mb-3">
-        <div class="col-md-3">
-            <select name="type" class="form-select" required>
-                <option value="Call">Звонок</option>
-                <option value="Email">Письмо</option>
-                <option value="Meeting">Встреча</option>
-            </select>
-        </div>
-        <div class="col-md-4">
-            <input type="text" name="description" class="form-control" placeholder="Описание" required />
-        </div>
-        <div class="col-md-3">
-            <input type="datetime-local" name="date" class="form-control" required />
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">➕ Добавить</button>
-        </div>
-    </div>
-</form>
-
-<ul class="list-group">
-    @if (ViewBag.Interactions != null && ViewBag.Interactions.Count > 0)
-    {
-        foreach (var interaction in ViewBag.Interactions)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="badge @(interaction.Type == "Call" ? "bg-success" : interaction.Type == "Email" ? "bg-info" : "bg-warning")">
-                        @interaction.Type
-                    </span>
-                    @interaction.Description
-                    <span class="badge bg-secondary ms-2">@interaction.Date.ToString("dd.MM.yyyy HH:mm")</span>
-                </div>
-                <form method="post" asp-action="DeleteInteraction" style="display: inline;">
-                    <input type="hidden" name="interactionId" value="@interaction.Id" />
-                    <input type="hidden" name="clientId" value="@Model.Id" />
-                    <button type="submit" class="btn btn-sm btn-danger">🗑 Удалить</button>
-                </form>
-            </li>
-        }
-    }
-    else
-    {
-        <li class="list-group-item text-muted">Нет взаимодействий</li>
-    }
-</ul>
-<ul class="list-group">
-    @if (ViewBag.Notes != null && ViewBag.Notes.Count > 0)
-    {
-        foreach (var note in ViewBag.Notes)
-        {
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    @note.Content
-                    <span class="badge bg-secondary ms-2">@note.CreatedAt.ToString("dd.MM.yyyy HH:mm")</span>
-                </div>
-                <form method="post" asp-action="DeleteNote" style="display: inline;">
-                    <input type="hidden" name="noteId" value="@note.Id" />
-                    <input type="hidden" name="clientId" value="@Model.Id" />
-                    <button type="submit" class="btn btn-sm btn-danger">🗑 Удалить</button>
-                </form>
-            </li>
-        }
-    }
-    else
-    {
-        <li class="list-group-item text-muted">Нет заметок</li>
-    }
-</ul>
+            // Взаимодействие
+            var editInteractionModal = document.getElementById('editInteractionModal');
+            editInteractionModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                document.getElementById('editInteractionId').value = button.getAttribute('data-id');
+                document.getElementById('editInteractionType').value = button.getAttribute('data-type');
+                document.getElementById('editInteractionDescription').value = button.getAttribute('data-description');
+                document.getElementById('editInteractionDate').value = button.getAttribute('data-date');
+            });
+        });
+    </script>
+}

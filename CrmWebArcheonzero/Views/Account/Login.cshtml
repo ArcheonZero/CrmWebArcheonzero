@@ -9,7 +9,27 @@
     <div class="alert alert-danger">@ViewBag.Error</div>
 }
 
-<form method="post">
+@if (ViewBag.DbMessage != null)
+{
+    <div class="alert alert-success">@ViewBag.DbMessage</div>
+}
+
+<!-- Кнопки выбора базы -->
+<form method="post" asp-action="SelectDatabase">
+    <div class="form-group">
+        <label>Выберите базу данных:</label>
+        <div>
+            <button type="submit" name="selectedProvider" value="Sqlite" class="btn btn-outline-primary">SQLite</button>
+            <button type="submit" name="selectedProvider" value="PostgreSQL" class="btn btn-outline-primary">PostgreSQL</button>
+            <button type="submit" name="selectedProvider" value="SqlServer" class="btn btn-outline-primary">SQL Server</button>
+        </div>
+    </div>
+</form>
+
+<hr />
+
+<!-- Форма входа -->
+<form method="post" asp-action="Login">
     <div class="form-group">
         <label>Логин</label>
         <input type="text" name="username" class="form-control" required />

@@ -70,7 +70,7 @@ namespace CrmWebArcheonzero.Controllers
         {
             if (ModelState.IsValid)
             {
-                client.CreatedAt = DateTime.Now;
+                client.CreatedAt = DateTime.UtcNow;
                 await _clientRepository.AddAsync(client);
                 return RedirectToAction(nameof(Index));
             }
@@ -157,7 +157,7 @@ namespace CrmWebArcheonzero.Controllers
                         Source = dto.Source,
                         Birthday = dto.Birthday,
                         Tags = dto.Tags,
-                        CreatedAt = DateTime.Now
+                        CreatedAt = DateTime.UtcNow
                     };
 
                     await _clientRepository.AddAsync(client);
@@ -269,7 +269,7 @@ namespace CrmWebArcheonzero.Controllers
                 Description = " ",
                 DueDate = dueDate,
                 Priority = priority,
-                CreatedAt = DateTime.Now,
+                CreatedAt = DateTime.UtcNow,
                 IsCompleted = false
             };
 
@@ -294,7 +294,7 @@ namespace CrmWebArcheonzero.Controllers
             {
                 ClientId = clientId,
                 Content = content,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             await _clientRepository.AddNoteAsync(note);

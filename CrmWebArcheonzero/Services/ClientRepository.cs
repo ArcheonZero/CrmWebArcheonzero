@@ -1,68 +1,78 @@
 using CrmWebArcheonzero.Data;
 using CrmWebArcheonzero.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CrmWebArcheonzero.Services
 {
     public class ClientRepository : IClientRepository
     {
+        private readonly Func<ApplicationDbContext> _contextFactory;
+
+        public ClientRepository(Func<ApplicationDbContext> contextFactory)
+        {
+            _contextFactory = contextFactory;
+        }
+
         public async Task<Client?> GetByPhoneAndEmailAsync(string? phone, string? email)
         {
-            return await _context.Clients
+            using var context = _contextFactory();
+            return await context.Clients
                 .FirstOrDefaultAsync(c => c.Phone == phone && c.Email == email);
         }
 
         public async Task<Client?> GetByPhoneAsync(string? phone)
         {
-            return await _context.Clients
+            using var context = _contextFactory();
+            return await context.Clients
                 .FirstOrDefaultAsync(c => c.Phone == phone);
         }
 
         public async Task<Client?> GetByEmailAsync(string? email)
         {
-            return await _context.Clients
+            using var context = _contextFactory();
+            return await context.Clients
                 .FirstOrDefaultAsync(c => c.Email == email);
         }
+
         public async Task<ClientTask?> GetTaskByIdAsync(int id)
         {
-            return await _context.ClientTasks.FirstOrDefaultAsync(t => t.Id == id);
+            using var context = _contextFactory();
+            return await context.Tasks.FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task UpdateTaskAsync(ClientTask task)
         {
-            _context.ClientTasks.Update(task);
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            context.Tasks.Update(task);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteTaskAsync(int id)
         {
-            var task = await _context.ClientTasks.FindAsync(id);
+            using var context = _contextFactory();
+            var task = await context.Tasks.FindAsync(id);
             if (task != null)
             {
-                _context.ClientTasks.Remove(task);
-                await _context.SaveChangesAsync();
+                context.Tasks.Remove(task);
+                await context.SaveChangesAsync();
             }
         }
+
         public async Task<Client?> GetByPhoneOrEmailAsync(string? phone, string? email)
         {
-            return await _context.Clients
+            using var context = _contextFactory();
+            return await context.Clients
                 .FirstOrDefaultAsync(c =>
                     (phone != null && c.Phone == phone) ||
                     (email != null && c.Email == email)
                 );
         }
-        private readonly ApplicationDbContext _context;
-
-        public ClientRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
 
         public async Task<List<Client>> GetAllAsync()
         {
-            return await _context.Clients
+            using var context = _contextFactory();
+            return await context.Clients
                 .Where(c => !c.IsDeleted)
                 .Include(c => c.AssignedUser)
                 .Include(c => c.Interactions)
@@ -73,7 +83,8 @@ namespace CrmWebArcheonzero.Services
 
         public async Task<Client?> GetByIdAsync(int id)
         {
-            return await _context.Clients
+            using var context = _contextFactory();
+            return await context.Clients
                 .Include(c => c.Interactions)
                 .Include(c => c.Tasks)
                 .Include(c => c.ClientNotes)
@@ -82,67 +93,72 @@ namespace CrmWebArcheonzero.Services
 
         public async Task AddAsync(Client client)
         {
-            _context.Clients.Add(client);
-
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            context.Clients.Add(client);
+            await context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Client client)
         {
-            _context.Entry(client).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            context.Entry(client).State = EntityState.Modified;
+            await context.SaveChangesAsync();
         }
 
         public async Task SoftDeleteAsync(int id, int userId)
         {
-            var client = await _context.Clients.FindAsync(id);
+            using var context = _contextFactory();
+            var client = await context.Clients.FindAsync(id);
             if (client != null)
             {
                 client.IsDeleted = true;
-                client.DeletedAt = DateTime.Now;
+                client.DeletedAt = DateTime.UtcNow;
                 client.DeletedByUserId = userId;
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
         }
 
         public async Task RestoreAsync(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
+            using var context = _contextFactory();
+            var client = await context.Clients.FindAsync(id);
             if (client != null)
             {
                 client.IsDeleted = false;
                 client.DeletedAt = null;
                 client.DeletedByUserId = null;
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
         }
 
         public async Task PermanentDeleteAsync(int id)
         {
-            var client = await _context.Clients.FindAsync(id);
+            using var context = _contextFactory();
+            var client = await context.Clients.FindAsync(id);
             if (client != null)
             {
-                _context.Clients.Remove(client);
-                await _context.SaveChangesAsync();
+                context.Clients.Remove(client);
+                await context.SaveChangesAsync();
             }
         }
 
         public async Task<List<Client>> GetDeletedAsync()
         {
-            return await _context.Clients
+            using var context = _contextFactory();
+            return await context.Clients
                 .Where(c => c.IsDeleted)
                 .Include(c => c.AssignedUser)
                 .ToListAsync();
         }
-        [Authorize(Roles = "Admin,SuperManager")]
 
         public async Task<List<Client>> SearchAsync(string query)
         {
+            using var context = _contextFactory();
             if (string.IsNullOrWhiteSpace(query))
                 return await GetAllAsync();
 
             var q = query.ToLower();
-            return await _context.Clients
+            return await context.Clients
                 .Where(c => !c.IsDeleted && (
                     c.Name.ToLower().Contains(q) ||
                     c.Phone.ToLower().Contains(q) ||
@@ -154,10 +170,11 @@ namespace CrmWebArcheonzero.Services
 
         public async Task<Dictionary<string, int>> GetStatisticsAsync()
         {
-            var total = await _context.Clients.CountAsync(c => !c.IsDeleted);
-            var active = await _context.Clients.CountAsync(c => c.Status == "Active" && !c.IsDeleted);
-            var inactive = await _context.Clients.CountAsync(c => c.Status == "Inactive" && !c.IsDeleted);
-            var lead = await _context.Clients.CountAsync(c => c.Status == "Lead" && !c.IsDeleted);
+            using var context = _contextFactory();
+            var total = await context.Clients.CountAsync(c => !c.IsDeleted);
+            var active = await context.Clients.CountAsync(c => c.Status == "Active" && !c.IsDeleted);
+            var inactive = await context.Clients.CountAsync(c => c.Status == "Inactive" && !c.IsDeleted);
+            var lead = await context.Clients.CountAsync(c => c.Status == "Lead" && !c.IsDeleted);
 
             return new Dictionary<string, int>
             {
@@ -170,7 +187,8 @@ namespace CrmWebArcheonzero.Services
 
         public async Task<List<ClientTask>> GetTasksByClientAsync(int clientId)
         {
-            return await _context.Tasks
+            using var context = _contextFactory();
+            return await context.Tasks
                 .Where(t => t.ClientId == clientId)
                 .OrderBy(t => t.DueDate)
                 .ToListAsync();
@@ -178,22 +196,26 @@ namespace CrmWebArcheonzero.Services
 
         public async Task AddTaskAsync(ClientTask task)
         {
-            _context.Tasks.Add(task);
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            context.Tasks.Add(task);
+            await context.SaveChangesAsync();
         }
 
         public async Task ToggleTaskCompletionAsync(int taskId)
         {
-            var task = await _context.Tasks.FindAsync(taskId);
+            using var context = _contextFactory();
+            var task = await context.Tasks.FindAsync(taskId);
             if (task != null)
             {
                 task.IsCompleted = !task.IsCompleted;
-                await _context.SaveChangesAsync();
+                await context.SaveChangesAsync();
             }
         }
+
         public async Task<List<Note>> GetNotesByClientAsync(int clientId)
         {
-            return await _context.Notes
+            using var context = _contextFactory();
+            return await context.Notes
                 .Where(n => n.ClientId == clientId)
                 .OrderByDescending(n => n.CreatedAt)
                 .ToListAsync();
@@ -201,22 +223,26 @@ namespace CrmWebArcheonzero.Services
 
         public async Task AddNoteAsync(Note note)
         {
-            _context.Notes.Add(note);
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            context.Notes.Add(note);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteNoteAsync(int noteId)
         {
-            var note = await _context.Notes.FindAsync(noteId);
+            using var context = _contextFactory();
+            var note = await context.Notes.FindAsync(noteId);
             if (note != null)
             {
-                _context.Notes.Remove(note);
-                await _context.SaveChangesAsync();
+                context.Notes.Remove(note);
+                await context.SaveChangesAsync();
             }
         }
+
         public async Task<List<Interaction>> GetInteractionsByClientAsync(int clientId)
         {
-            return await _context.Interactions
+            using var context = _contextFactory();
+            return await context.Interactions
                 .Where(i => i.ClientId == clientId)
                 .OrderByDescending(i => i.Date)
                 .ToListAsync();
@@ -224,44 +250,58 @@ namespace CrmWebArcheonzero.Services
 
         public async Task AddInteractionAsync(Interaction interaction)
         {
-            _context.Interactions.Add(interaction);
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            context.Interactions.Add(interaction);
+            await context.SaveChangesAsync();
         }
 
         public async Task DeleteInteractionAsync(int interactionId)
         {
-            var interaction = await _context.Interactions.FindAsync(interactionId);
+            using var context = _contextFactory();
+            var interaction = await context.Interactions.FindAsync(interactionId);
             if (interaction != null)
             {
-                _context.Interactions.Remove(interaction);
-                await _context.SaveChangesAsync();
+                context.Interactions.Remove(interaction);
+                await context.SaveChangesAsync();
             }
         }
+
         public async Task<Note?> GetNoteByIdAsync(int id)
         {
-            return await _context.Notes.FirstOrDefaultAsync(n => n.Id == id);
+            using var context = _contextFactory();
+            return await context.Notes.FirstOrDefaultAsync(n => n.Id == id);
         }
 
         public async Task UpdateNoteAsync(Note note)
         {
-            _context.Notes.Update(note);
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            var existing = await context.Notes.FindAsync(note.Id);
+            if (existing != null)
+            {
+                context.Entry(existing).CurrentValues.SetValues(note);
+                context.Entry(existing).Property(x => x.CreatedAt).IsModified = false;
+                await context.SaveChangesAsync();
+            }
         }
 
         public async Task<Interaction?> GetInteractionByIdAsync(int id)
         {
-            return await _context.Interactions.FirstOrDefaultAsync(i => i.Id == id);
+            using var context = _contextFactory();
+            return await context.Interactions.FirstOrDefaultAsync(i => i.Id == id);
         }
 
         public async Task UpdateInteractionAsync(Interaction interaction)
         {
-            _context.Interactions.Update(interaction);
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            context.Interactions.Update(interaction);
+            await context.SaveChangesAsync();
         }
+
         public async Task<List<ChatMessage>> GetChatMessagesAsync()
         {
-            return await _context.ChatMessages
-                .Include(m => m.User) // ← добавить это
+            using var context = _contextFactory();
+            return await context.ChatMessages
+                .Include(m => m.User)
                 .OrderByDescending(m => m.SentAt)
                 .Take(100)
                 .ToListAsync();
@@ -269,14 +309,16 @@ namespace CrmWebArcheonzero.Services
 
         public async Task AddChatMessageAsync(ChatMessage message)
         {
-            message.SentAt = DateTime.Now; // ← замени CreatedAt на SentAt
-            _context.ChatMessages.Add(message);
-            await _context.SaveChangesAsync();
+            using var context = _contextFactory();
+            message.SentAt = DateTime.UtcNow;
+            context.ChatMessages.Add(message);
+            await context.SaveChangesAsync();
         }
 
         public async Task<User?> GetUserByIdAsync(int id)
         {
-            return await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            using var context = _contextFactory();
+            return await context.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
     }
 }

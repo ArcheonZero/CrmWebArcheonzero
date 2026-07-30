@@ -5,40 +5,69 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<AuthService>();
-// 1. Добавляем контекст базы данных
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+// 0. Регистрируем сервис управления БД
+builder.Services.AddScoped<IDatabaseService, DatabaseService>();
 
-// 2. Регистрируем репозиторий
+// 1. Регистрируем фабрику контекста
+builder.Services.AddScoped<Func<ApplicationDbContext>>(provider => () =>
+{
+    var dbService = provider.GetRequiredService<IDatabaseService>();
+    var providerName = dbService.GetProvider();
+    var connectionString = dbService.GetConnectionString();
+    Console.WriteLine($"Создаём контекст с провайдером: {providerName}");
+    var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+
+    switch (providerName)
+    {
+        case "PostgreSQL":
+            optionsBuilder.UseNpgsql(connectionString);
+            break;
+        case "SqlServer":
+            optionsBuilder.UseSqlServer(connectionString);
+            break;
+        case "Sqlite":
+        default:
+            optionsBuilder.UseSqlite(connectionString);
+            break;
+    }
+
+    return new ApplicationDbContext(optionsBuilder.Options);
+});
+
+// 2. Регистрируем остальные сервисы
+builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<ExportService>();
-// 0. Добавляем Авторизацию
+
+
+// 3. Добавляем Авторизацию
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
         options.LoginPath = "/Account/Login";
         options.AccessDeniedPath = "/Account/Login";
     });
-// авторизация
 builder.Services.AddAuthorization();
-// 3. Добавляем контроллеры и представления
+
+// 4. Добавляем контроллеры и представления
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// 4. Создаём базу и добавляем тестовые данные при первом запуске
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.EnsureCreated(); // создаёт БД, если её нет
-    dbContext.EnsureSeedData(); // добавляет тестовых клиентов и пользователей
-}
 
 // 5. Настройка маршрутизации
 app.UseRouting();
-app.UseAuthentication(); 
-app.UseAuthorization();    
+app.UseSession();
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Clients}/{action=Index}/{id?}");

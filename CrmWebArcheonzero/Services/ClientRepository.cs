@@ -8,7 +8,23 @@ namespace CrmWebArcheonzero.Services
 {
     public class ClientRepository : IClientRepository
     {
+        public async Task<Client?> GetByPhoneAndEmailAsync(string? phone, string? email)
+        {
+            return await _context.Clients
+                .FirstOrDefaultAsync(c => c.Phone == phone && c.Email == email);
+        }
 
+        public async Task<Client?> GetByPhoneAsync(string? phone)
+        {
+            return await _context.Clients
+                .FirstOrDefaultAsync(c => c.Phone == phone);
+        }
+
+        public async Task<Client?> GetByEmailAsync(string? email)
+        {
+            return await _context.Clients
+                .FirstOrDefaultAsync(c => c.Email == email);
+        }
         public async Task<ClientTask?> GetTaskByIdAsync(int id)
         {
             return await _context.ClientTasks.FirstOrDefaultAsync(t => t.Id == id);
@@ -67,6 +83,7 @@ namespace CrmWebArcheonzero.Services
         public async Task AddAsync(Client client)
         {
             _context.Clients.Add(client);
+
             await _context.SaveChangesAsync();
         }
 

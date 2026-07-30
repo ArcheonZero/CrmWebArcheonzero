@@ -11,7 +11,7 @@ namespace CrmWebArcheonzero.Models
         public DateTime DueDate { get; set; }
         public string Priority { get; set; } = "Medium";
         public bool IsCompleted { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Client? Client { get; set; }
     }

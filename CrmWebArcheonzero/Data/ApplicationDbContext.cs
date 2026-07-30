@@ -108,7 +108,7 @@ public void EnsureSeedData()
                     FullName = "Администратор",
                     Role = "Admin",
                     IsActive = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 });
             }
             if (!Users.Any(u => u.Username == "admin5"))
@@ -121,7 +121,7 @@ public void EnsureSeedData()
                     FullName = "Администратор",
                     Role = "Admin",
                     IsActive = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 });
             }
             if (!Users.Any(u => u.Username == "manager"))
@@ -134,7 +134,7 @@ public void EnsureSeedData()
                     FullName = "Менеджер",
                     Role = "Manager",
                     IsActive = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 });
             }
 
@@ -148,7 +148,7 @@ public void EnsureSeedData()
                     FullName = "Super менеджер",
                     Role = "SuperManager",
                     IsActive = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 });
             }
 
@@ -162,7 +162,7 @@ public void EnsureSeedData()
                     FullName = "Пользователь",
                     Role = "User",
                     IsActive = true,
-                    CreatedAt = DateTime.Now
+                    CreatedAt = DateTime.UtcNow
                 });
             }
 
@@ -180,7 +180,7 @@ public void EnsureSeedData()
             Email = "ivan@mail.ru",
             Status = "Active",
             Company = "ООО ТехноСервис",
-            CreatedAt = DateTime.Now.AddDays(-30),
+            CreatedAt = DateTime.UtcNow.AddDays(-30),
             Birthday = new DateTime(1985, 5, 15)
         },
         new Client
@@ -190,7 +190,7 @@ public void EnsureSeedData()
             Email = "maria@yandex.ru",
             Status = "Lead",
             Company = "ИП Сидорова",
-            CreatedAt = DateTime.Now.AddDays(-15)
+            CreatedAt = DateTime.UtcNow.AddDays(-15)
         },
         new Client
         {
@@ -199,7 +199,7 @@ public void EnsureSeedData()
             Email = "alex@google.com",
             Status = "Inactive",
             Company = "ООО Альфа",
-            CreatedAt = DateTime.Now.AddDays(-60)
+            CreatedAt = DateTime.UtcNow.AddDays(-60)
         }
     };
 

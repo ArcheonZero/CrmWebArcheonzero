@@ -9,7 +9,7 @@ namespace CrmWebArcheonzero.Models
         public int? FromUserId { get; set; }
         public int ToUserId { get; set; }
         public int AssignedByUserId { get; set; }
-        public DateTime AssignedAt { get; set; } = DateTime.Now;
+        public DateTime AssignedAt { get; set; } = DateTime.UtcNow;
 
         public Client? Client { get; set; }
         public User? FromUser { get; set; }

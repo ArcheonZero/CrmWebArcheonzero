@@ -34,7 +34,7 @@ namespace CrmWebArcheonzero.Controllers
             {
                 UserId = userId,
                 Message = message,
-                SentAt = DateTime.Now
+                SentAt = DateTime.UtcNow
             };
 
             await _clientRepository.AddChatMessageAsync(chatMessage);

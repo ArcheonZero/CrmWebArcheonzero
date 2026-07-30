@@ -36,7 +36,7 @@ namespace CrmWebArcheonzero.Controllers
         public IActionResult Create(int clientId)
         {
             ViewBag.ClientId = clientId;
-            return View(new ClientTask { ClientId = clientId, DueDate = DateTime.Now.AddDays(7) });
+            return View(new ClientTask { ClientId = clientId, DueDate = DateTime.UtcNow.AddDays(7) });
         }
 
         [HttpPost]
@@ -45,7 +45,7 @@ namespace CrmWebArcheonzero.Controllers
         {
             if (ModelState.IsValid)
             {
-                task.CreatedAt = DateTime.Now;
+                task.CreatedAt = DateTime.UtcNow;
                 task.IsCompleted = false;
                 await _clientRepository.AddTaskAsync(task);
                 return RedirectToAction(nameof(Index), new { clientId = task.ClientId });

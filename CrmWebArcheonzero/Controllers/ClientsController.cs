@@ -100,8 +100,52 @@ namespace CrmWebArcheonzero.Controllers
                 var importedClients = await importService.ImportClientsAsync(stream);
 
                 int added = 0;
+                int updated = 0;
+
                 foreach (var dto in importedClients)
                 {
+                    // Ищем клиента, у которого совпадают И телефон, И email
+                    var existing = await _clientRepository.GetByPhoneAndEmailAsync(dto.CleanPhone, dto.Email);
+
+                    if (existing != null)
+                    {
+                        // Полное совпадение — обновляем
+                        existing.Name = dto.Name ?? existing.Name;
+                        existing.Company = dto.Company ?? existing.Company;
+                        existing.Position = dto.Position ?? existing.Position;
+                        existing.Status = dto.Status ?? existing.Status;
+                        existing.Source = dto.Source ?? existing.Source;
+                        existing.Birthday = dto.Birthday ?? existing.Birthday;
+                        existing.Tags = dto.Tags ?? existing.Tags;
+                        
+
+                        await _clientRepository.UpdateAsync(existing);
+                        updated++;
+                        _logger.LogInformation("Обновлён клиент: ID={Id}, Name={Name}", existing.Id, existing.Name);
+                        continue;
+                    }
+
+                    // Проверяем, нет ли клиента с таким телефоном (но другим email)
+                    var existingByPhone = await _clientRepository.GetByPhoneAsync(dto.CleanPhone);
+                    if (existingByPhone != null)
+                    {
+                        _logger.LogWarning("Найден клиент с таким же телефоном, но другим email: ID={Id}, Name={Name}, Phone={Phone}, Email={Email}",
+                            existingByPhone.Id, existingByPhone.Name, existingByPhone.Phone, existingByPhone.Email);
+                        // Можно добавить в список ошибок или пропустить
+                        continue;
+                    }
+
+                    // Проверяем, нет ли клиента с таким email (но другим телефоном)
+                    var existingByEmail = await _clientRepository.GetByEmailAsync(dto.Email);
+                    if (existingByEmail != null)
+                    {
+                        _logger.LogWarning("Найден клиент с таким же email, но другим телефоном: ID={Id}, Name={Name}, Phone={Phone}, Email={Email}",
+                            existingByEmail.Id, existingByEmail.Name, existingByEmail.Phone, existingByEmail.Email);
+                        // Можно добавить в список ошибок или пропустить
+                        continue;
+                    }
+
+                    // Новый клиент
                     var client = new Client
                     {
                         Name = dto.Name,
@@ -120,11 +164,12 @@ namespace CrmWebArcheonzero.Controllers
                     added++;
                 }
 
-                TempData["Success"] = $"✅ Импортировано {added} клиентов.";
+                TempData["Success"] = $"✅ Импортировано: {added} новых, обновлено: {updated}.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Ошибка при импорте клиентов");
                 TempData["Error"] = $"❌ Ошибка при импорте: {ex.Message}";
                 return RedirectToAction(nameof(Index));
             }

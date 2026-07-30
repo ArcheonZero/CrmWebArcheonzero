@@ -50,7 +50,7 @@ namespace CrmWebArcheonzero.Services
 
                     page.Footer()
                         .AlignCenter()
-                        .Text($"Сгенерировано: {DateTime.Now:dd.MM.yyyy HH:mm} | CRM Arkheonzero");
+                        .Text($"Сгенерировано: {DateTime.UtcNow:dd.MM.yyyy HH:mm} | CRM Arkheonzero");
                 });
             });
 

@@ -46,7 +46,7 @@ namespace CrmWebArcheonzero.Controllers
             {
                 ClientId = clientId,
                 Content = content,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             await _clientRepository.AddNoteAsync(note);

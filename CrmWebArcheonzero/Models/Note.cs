@@ -7,7 +7,7 @@ namespace CrmWebArcheonzero.Models
         public int Id { get; set; }
         public int ClientId { get; set; }
         public string Content { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public Client? Client { get; set; }
     }

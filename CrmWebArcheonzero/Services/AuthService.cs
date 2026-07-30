@@ -48,7 +48,7 @@ namespace CrmWebArcheonzero.Services
                 FullName = fullName,
                 Role = role,
                 IsActive = true,
-                CreatedAt = DateTime.Now
+                CreatedAt = DateTime.UtcNow
             };
 
             _context.Users.Add(user);

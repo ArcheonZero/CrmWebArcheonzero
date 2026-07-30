@@ -35,6 +35,9 @@ namespace CrmWebArcheonzero.Services
         Task<List<ChatMessage>> GetChatMessagesAsync();
         Task AddChatMessageAsync(ChatMessage message);
         Task<User?> GetUserByIdAsync(int id);
+        Task<Client?> GetByPhoneAndEmailAsync(string? phone, string? email);
+        Task<Client?> GetByPhoneAsync(string? phone);
+        Task<Client?> GetByEmailAsync(string? email);
 
     }
 }

@@ -38,6 +38,20 @@ namespace CrmWebArcheonzero.Services
         {
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
+
+            // Запись в историю
+            var historyEntry = new AssignmentHistory
+            {
+                ClientId = client.Id,
+                ChangeType = "Created",
+                FieldName = "Client",
+                OldValue = null,
+                NewValue = client.Name,
+                AssignedByUserId = userId,
+                AssignedAt = DateTime.UtcNow
+            };
+            _context.AssignmentHistories.Add(historyEntry);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(Client client, int userId)
@@ -49,9 +63,38 @@ namespace CrmWebArcheonzero.Services
             if (existing == null)
                 return;
 
-            // Логика сравнения полей и создания истории будет в отдельном сервисе или репозитории
+            var historyEntries = new List<AssignmentHistory>();
+
+            // Сравниваем поля и создаём записи истории
+            if (existing.Name != client.Name)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Name", existing.Name, client.Name, userId));
+            if (existing.Phone != client.Phone)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Phone", existing.Phone, client.Phone, userId));
+            if (existing.Email != client.Email)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Email", existing.Email, client.Email, userId));
+            if (existing.Company != client.Company)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Company", existing.Company, client.Company, userId));
+            if (existing.Status != client.Status)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Status", existing.Status, client.Status, userId));
+            if (existing.Source != client.Source)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Source", existing.Source, client.Source, userId));
+            if (existing.Tags != client.Tags)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Tags", existing.Tags, client.Tags, userId));
+            if (existing.Notes != client.Notes)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Notes", existing.Notes, client.Notes, userId));
+            if (existing.Birthday != client.Birthday)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Birthday", existing.Birthday, client.Birthday, userId));
+
+            // Обновляем клиента
             _context.Entry(client).State = EntityState.Modified;
             await _context.SaveChangesAsync();
+
+            // Сохраняем историю
+            if (historyEntries.Any())
+            {
+                _context.AssignmentHistories.AddRange(historyEntries);
+                await _context.SaveChangesAsync();
+            }
         }
 
         public async Task SoftDeleteAsync(int id, int userId)
@@ -62,6 +105,20 @@ namespace CrmWebArcheonzero.Services
                 client.IsDeleted = true;
                 client.DeletedAt = DateTime.UtcNow;
                 client.DeletedByUserId = userId;
+                await _context.SaveChangesAsync();
+
+                // Запись в историю
+                var historyEntry = new AssignmentHistory
+                {
+                    ClientId = id,
+                    ChangeType = "Deleted",
+                    FieldName = "Client",
+                    OldValue = client.Name,
+                    NewValue = null,
+                    AssignedByUserId = userId,
+                    AssignedAt = DateTime.UtcNow
+                };
+                _context.AssignmentHistories.Add(historyEntry);
                 await _context.SaveChangesAsync();
             }
         }
@@ -74,6 +131,20 @@ namespace CrmWebArcheonzero.Services
                 client.IsDeleted = false;
                 client.DeletedAt = null;
                 client.DeletedByUserId = null;
+                await _context.SaveChangesAsync();
+
+                // Запись в историю
+                var historyEntry = new AssignmentHistory
+                {
+                    ClientId = id,
+                    ChangeType = "Restored",
+                    FieldName = "Client",
+                    OldValue = null,
+                    NewValue = client.Name,
+                    AssignedByUserId = userId,
+                    AssignedAt = DateTime.UtcNow
+                };
+                _context.AssignmentHistories.Add(historyEntry);
                 await _context.SaveChangesAsync();
             }
         }
@@ -145,6 +216,7 @@ namespace CrmWebArcheonzero.Services
             return await _context.Clients
                 .FirstOrDefaultAsync(c => c.Email == email);
         }
+
         public async Task<Client?> GetByPhoneOrEmailAsync(string? phone, string? email)
         {
             return await _context.Clients
@@ -152,6 +224,24 @@ namespace CrmWebArcheonzero.Services
                     (phone != null && c.Phone == phone) ||
                     (email != null && c.Email == email)
                 );
+        }
+
+        // ============================================================
+        // ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ДЛЯ ИСТОРИИ
+        // ============================================================
+
+        private AssignmentHistory CreateHistoryEntry(int clientId, string changeType, string fieldName, object? oldValue, object? newValue, int userId)
+        {
+            return new AssignmentHistory
+            {
+                ClientId = clientId,
+                ChangeType = changeType,
+                FieldName = fieldName,
+                OldValue = oldValue?.ToString(),
+                NewValue = newValue?.ToString(),
+                AssignedByUserId = userId,
+                AssignedAt = DateTime.UtcNow
+            };
         }
     }
 }

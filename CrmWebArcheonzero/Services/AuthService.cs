@@ -7,11 +7,11 @@ namespace CrmWebArcheonzero.Services
 {
     public class AuthService
     {
-        private readonly Func<ApplicationDbContext> _contextFactory;
+        private readonly ApplicationDbContext _context;
 
-        public AuthService(Func<ApplicationDbContext> contextFactory)
+        public AuthService(ApplicationDbContext context)
         {
-            _contextFactory = contextFactory;
+            _context = context;
         }
 
         public async Task<User?> GetUserByIdAsync(int userId)
@@ -19,15 +19,13 @@ namespace CrmWebArcheonzero.Services
             if (userId <= 0)
                 return null;
 
-            using var context = _contextFactory();
-            return await context.Users
+            return await _context.Users
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         public async Task<User?> LoginAsync(string username, string password)
         {
-            using var context = _contextFactory();
-            var user = await context.Users
+            var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == username && u.IsActive);
 
             if (user == null)
@@ -41,8 +39,7 @@ namespace CrmWebArcheonzero.Services
 
         public async Task<bool> RegisterAsync(string username, string password, string email, string fullName, string role = "User")
         {
-            using var context = _contextFactory();
-            if (await context.Users.AnyAsync(u => u.Username == username))
+            if (await _context.Users.AnyAsync(u => u.Username == username))
                 return false;
 
             var user = new User
@@ -56,38 +53,35 @@ namespace CrmWebArcheonzero.Services
                 CreatedAt = DateTime.UtcNow
             };
 
-            context.Users.Add(user);
-            await context.SaveChangesAsync();
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
             return true;
         }
 
         public async Task<List<User>> GetAllUsersAsync()
         {
-            using var context = _contextFactory();
-            return await context.Users
+            return await _context.Users
                 .OrderBy(u => u.Username)
                 .ToListAsync();
         }
 
         public async Task ChangeRoleAsync(int userId, string newRole)
         {
-            using var context = _contextFactory();
-            var user = await context.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
             if (user != null)
             {
                 user.Role = newRole;
-                await context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
 
         public async Task ToggleUserStatusAsync(int userId)
         {
-            using var context = _contextFactory();
-            var user = await context.Users.FindAsync(userId);
+            var user = await _context.Users.FindAsync(userId);
             if (user != null)
             {
                 user.IsActive = !user.IsActive;
-                await context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
             }
         }
     }

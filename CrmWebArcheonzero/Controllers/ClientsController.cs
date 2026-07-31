@@ -71,7 +71,20 @@ namespace CrmWebArcheonzero.Controllers
             if (ModelState.IsValid)
             {
                 client.CreatedAt = DateTime.UtcNow;
-                await _clientRepository.AddAsync(client);
+                await _clientRepository.AddAsync(client, GetCurrentUserId());
+
+                // Запись в историю
+                var historyEntry = new AssignmentHistory
+                {
+                    ClientId = client.Id,
+                    ChangeType = "Created",
+                    FieldName = "Client",
+                    OldValue = null,
+                    NewValue = client.Name,
+                    AssignedByUserId = GetCurrentUserId(),
+                    AssignedAt = DateTime.UtcNow
+                };
+                await _clientRepository.AddHistoryEntryAsync(historyEntry);
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
@@ -160,7 +173,7 @@ namespace CrmWebArcheonzero.Controllers
                         CreatedAt = DateTime.UtcNow
                     };
 
-                    await _clientRepository.AddAsync(client);
+                    await _clientRepository.AddAsync(client, GetCurrentUserId());
                     added++;
                 }
 
@@ -194,10 +207,55 @@ namespace CrmWebArcheonzero.Controllers
 
             if (ModelState.IsValid)
             {
-                await _clientRepository.UpdateAsync(client, GetCurrentUserId());
+                // Получаем старую версию клиента
+                var oldClient = await _clientRepository.GetByIdAsync(id);
+                if (oldClient == null) return NotFound();
+
+                // Сравниваем поля и создаём записи истории
+                var historyEntries = new List<AssignmentHistory>();
+                var userId = GetCurrentUserId();
+
+                if (oldClient.Name != client.Name)
+                    historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Name", oldClient.Name, client.Name, userId));
+                if (oldClient.Phone != client.Phone)
+                    historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Phone", oldClient.Phone, client.Phone, userId));
+                if (oldClient.Email != client.Email)
+                    historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Email", oldClient.Email, client.Email, userId));
+                if (oldClient.Company != client.Company)
+                    historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Company", oldClient.Company, client.Company, userId));
+                if (oldClient.Status != client.Status)
+                    historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Status", oldClient.Status, client.Status, userId));
+                if (oldClient.Birthday != client.Birthday)
+                    historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Birthday", oldClient.Birthday, client.Birthday, userId));
+
+                // Обновляем клиента
+                await _clientRepository.UpdateAsync(client, userId);
+
+                // Сохраняем историю
+                if (historyEntries.Any())
+                {
+                    foreach (var entry in historyEntries)
+                        await _clientRepository.AddHistoryEntryAsync(entry);
+                }
+
                 return RedirectToAction(nameof(Index));
             }
             return View(client);
+        }
+
+        // Вспомогательный метод для создания записи истории
+        private AssignmentHistory CreateHistoryEntry(int clientId, string changeType, string fieldName, object? oldValue, object? newValue, int userId)
+        {
+            return new AssignmentHistory
+            {
+                ClientId = clientId,
+                ChangeType = changeType,
+                FieldName = fieldName,
+                OldValue = oldValue?.ToString(),
+                NewValue = newValue?.ToString(),
+                AssignedByUserId = userId,
+                AssignedAt = DateTime.UtcNow
+            };
         }
 
         // ============================================================
@@ -211,12 +269,31 @@ namespace CrmWebArcheonzero.Controllers
             return View(client);
         }
 
+
+
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Admin,SuperManager,Manager")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var userId = GetCurrentUserId();
+            var client = await _clientRepository.GetByIdAsync(id);
+            if (client != null)
+            {
+                // Запись в историю
+                var historyEntry = new AssignmentHistory
+                {
+                    ClientId = id,
+                    ChangeType = "Deleted",
+                    FieldName = "Client",
+                    OldValue = client.Name,
+                    NewValue = null,
+                    AssignedByUserId = userId,
+                    AssignedAt = DateTime.UtcNow
+                };
+                await _clientRepository.AddHistoryEntryAsync(historyEntry);
+            }
+
             await _clientRepository.SoftDeleteAsync(id, userId);
             return RedirectToAction(nameof(Index));
         }
@@ -224,7 +301,25 @@ namespace CrmWebArcheonzero.Controllers
         [Authorize(Roles = "Admin,SuperManager")]
         public async Task<IActionResult> Restore(int id)
         {
-            await _clientRepository.RestoreAsync(id);
+            var userId = GetCurrentUserId();
+            var client = await _clientRepository.GetByIdAsync(id);
+            if (client != null)
+            {
+                // Запись в историю
+                var historyEntry = new AssignmentHistory
+                {
+                    ClientId = id,
+                    ChangeType = "Restored",
+                    FieldName = "Client",
+                    OldValue = null,
+                    NewValue = client.Name,
+                    AssignedByUserId = userId,
+                    AssignedAt = DateTime.UtcNow
+                };
+                await _clientRepository.AddHistoryEntryAsync(historyEntry);
+            }
+
+            await _clientRepository.RestoreAsync(id, userId);
             return RedirectToAction(nameof(Index));
         }
 
@@ -368,6 +463,16 @@ namespace CrmWebArcheonzero.Controllers
             await _clientRepository.UpdateInteractionAsync(interaction);
             return RedirectToAction(nameof(Details), new { id = interaction.ClientId });
         }
+        public async Task<IActionResult> History(int id)
+        {
+            var client = await _clientRepository.GetByIdAsync(id);
+            if (client == null)
+                return NotFound();
 
+            var history = await _clientRepository.GetHistoryByClientAsync(id);
+            ViewBag.ClientName = client.Name;
+            ViewBag.ClientId = id; // ← добавить эту строку
+            return View(history);
+        }
     }
 }

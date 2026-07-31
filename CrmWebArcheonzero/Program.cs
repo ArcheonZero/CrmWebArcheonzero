@@ -18,8 +18,8 @@ builder.Services.AddSession(options =>
 // === Регистрация сервисов ===
 builder.Services.AddScoped<IDatabaseService, DatabaseService>();
 
-// Фабрика контекста
-builder.Services.AddScoped<Func<ApplicationDbContext>>(provider => () =>
+// Регистрируем контекст базы данных как Scoped (один экземпляр на запрос)
+builder.Services.AddScoped<ApplicationDbContext>(provider =>
 {
     var dbService = provider.GetRequiredService<IDatabaseService>();
     var providerName = dbService.GetProvider();

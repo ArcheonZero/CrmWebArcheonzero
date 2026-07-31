@@ -1,0 +1,61 @@
+@model List<CrmWebArcheonzero.Models.AssignmentHistory>
+
+@{
+    ViewData["Title"] = "История изменений";
+}
+
+<h2>История изменений для клиента: @ViewBag.ClientName</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Тип</th>
+            <th>Поле</th>
+            <th>Было</th>
+            <th>Стало</th>
+            <th>Кто изменил</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.AssignedAt.ToString("dd.MM.yyyy HH:mm")</td>
+                    <td>
+                        @switch (item.ChangeType)
+                        {
+                            case "Created":
+                                <span class="badge bg-success">Создан</span>
+                                break;
+                            case "Updated":
+                                <span class="badge bg-primary">Изменён</span>
+                                break;
+                            case "Deleted":
+                                <span class="badge bg-danger">Удалён</span>
+                                break;
+                            case "Restored":
+                                <span class="badge bg-warning text-dark">Восстановлен</span>
+                                break;
+                            default:
+                                <span class="badge bg-secondary">@item.ChangeType</span>
+                                break;
+                        }
+                    </td>
+                    <td>@item.FieldName</td>
+                    <td>@(item.OldValue ?? "—")</td>
+                    <td>@(item.NewValue ?? "—")</td>
+                    <td>@(item.AssignedByUser?.FullName ?? "Система")</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="6" class="text-muted">История изменений пуста</td></tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Details" asp-route-id="@ViewBag.ClientId" class="btn btn-secondary">⬅ Назад</a>

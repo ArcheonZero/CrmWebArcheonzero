@@ -7,10 +7,10 @@ namespace CrmWebArcheonzero.Services
         Task<Client?> GetByPhoneOrEmailAsync(string? phone, string? email);
         Task<List<Client>> GetAllAsync();
         Task<Client?> GetByIdAsync(int id);
-        Task AddAsync(Client client);
+        Task AddAsync(Client client, int userId);
         Task UpdateAsync(Client client, int userId);
         Task SoftDeleteAsync(int id, int userId);
-        Task RestoreAsync(int id);
+        Task RestoreAsync(int id, int userId);
         Task PermanentDeleteAsync(int id);
         Task<List<Client>> GetDeletedAsync();
         Task<List<Client>> SearchAsync(string query);

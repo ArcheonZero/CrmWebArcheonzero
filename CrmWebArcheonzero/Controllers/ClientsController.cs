@@ -117,9 +117,9 @@ namespace CrmWebArcheonzero.Controllers
                         existing.Source = dto.Source ?? existing.Source;
                         existing.Birthday = dto.Birthday ?? existing.Birthday;
                         existing.Tags = dto.Tags ?? existing.Tags;
-                        
 
-                        await _clientRepository.UpdateAsync(existing);
+
+                        await _clientRepository.UpdateAsync(existing, GetCurrentUserId());
                         updated++;
                         _logger.LogInformation("Обновлён клиент: ID={Id}, Name={Name}", existing.Id, existing.Name);
                         continue;
@@ -194,7 +194,7 @@ namespace CrmWebArcheonzero.Controllers
 
             if (ModelState.IsValid)
             {
-                await _clientRepository.UpdateAsync(client);
+                await _clientRepository.UpdateAsync(client, GetCurrentUserId());
                 return RedirectToAction(nameof(Index));
             }
             return View(client);

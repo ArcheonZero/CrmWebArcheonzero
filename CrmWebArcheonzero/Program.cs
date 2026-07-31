@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// === Настройка сессий ===
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
@@ -13,16 +14,20 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
-// 0. Регистрируем сервис управления БД
+
+// === Регистрация сервисов ===
 builder.Services.AddScoped<IDatabaseService, DatabaseService>();
 
-// 1. Регистрируем фабрику контекста
+// Фабрика контекста
 builder.Services.AddScoped<Func<ApplicationDbContext>>(provider => () =>
 {
     var dbService = provider.GetRequiredService<IDatabaseService>();
     var providerName = dbService.GetProvider();
     var connectionString = dbService.GetConnectionString();
-    Console.WriteLine($"Создаём контекст с провайдером: {providerName}");
+
+    Console.WriteLine($"[Program] Создаём контекст с провайдером: {providerName}");
+    Console.WriteLine($"[Program] Строка подключения: {connectionString}");
+
     var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
 
     switch (providerName)
@@ -42,13 +47,11 @@ builder.Services.AddScoped<Func<ApplicationDbContext>>(provider => () =>
     return new ApplicationDbContext(optionsBuilder.Options);
 });
 
-// 2. Регистрируем остальные сервисы
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.AddScoped<ExportService>();
 
-
-// 3. Добавляем Авторизацию
+// === Авторизация ===
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -57,17 +60,48 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 builder.Services.AddAuthorization();
 
-// 4. Добавляем контроллеры и представления
+// === Контроллеры и представления ===
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
+// === Создание базы при первом запуске ===
+using (var scope = app.Services.CreateScope())
+{
+    var dbService = scope.ServiceProvider.GetRequiredService<IDatabaseService>();
+    var providerName = dbService.GetProvider();
+    var connectionString = dbService.GetConnectionString();
 
-// 5. Настройка маршрутизации
+    Console.WriteLine($"[Program] Создаём базу с провайдером: {providerName}");
+    Console.WriteLine($"[Program] Строка подключения: {connectionString}");
+
+    var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+
+    switch (providerName)
+    {
+        case "PostgreSQL":
+            optionsBuilder.UseNpgsql(connectionString);
+            break;
+        case "SqlServer":
+            optionsBuilder.UseSqlServer(connectionString);
+            break;
+        case "Sqlite":
+        default:
+            optionsBuilder.UseSqlite(connectionString);
+            break;
+    }
+
+    using var dbContext = new ApplicationDbContext(optionsBuilder.Options);
+    dbContext.Database.EnsureCreated();
+    dbContext.EnsureSeedData();
+}
+
+// === Настройка маршрутизации ===
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Clients}/{action=Index}/{id?}");

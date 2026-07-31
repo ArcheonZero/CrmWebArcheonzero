@@ -17,7 +17,6 @@ namespace CrmWebArcheonzero.Data
         public DbSet<User> Users { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<AssignmentHistory> AssignmentHistories { get; set; }
-        //public DbSet<ClientTask> ClientTasks { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // === НАСТРОЙКА ДЛЯ USER ===

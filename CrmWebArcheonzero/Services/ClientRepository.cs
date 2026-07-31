@@ -98,11 +98,51 @@ namespace CrmWebArcheonzero.Services
             await context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Client client)
+        public async Task UpdateAsync(Client client, int userId)
         {
             using var context = _contextFactory();
+
+            // 1. Получаем старую версию клиента из базы (без отслеживания)
+            var existing = await context.Clients
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == client.Id);
+
+            if (existing == null)
+                return;
+
+            // 2. Создаём список записей для истории
+            var historyEntries = new List<AssignmentHistory>();
+
+            // 3. Сравниваем поля
+            if (existing.Name != client.Name)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Name", existing.Name, client.Name, userId));
+            if (existing.Phone != client.Phone)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Phone", existing.Phone, client.Phone, userId));
+            if (existing.Email != client.Email)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Email", existing.Email, client.Email, userId));
+            if (existing.Company != client.Company)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Company", existing.Company, client.Company, userId));
+            if (existing.Status != client.Status)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Status", existing.Status, client.Status, userId));
+            if (existing.Source != client.Source)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Source", existing.Source, client.Source, userId));
+            if (existing.Tags != client.Tags)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Tags", existing.Tags, client.Tags, userId));
+            if (existing.Notes != client.Notes)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Notes", existing.Notes, client.Notes, userId));
+            if (existing.Birthday != client.Birthday)
+                historyEntries.Add(CreateHistoryEntry(client.Id, "Updated", "Birthday", existing.Birthday?.ToString("yyyy-MM-dd"), client.Birthday?.ToString("yyyy-MM-dd"), userId));
+
+            // 4. Обновляем клиента
             context.Entry(client).State = EntityState.Modified;
             await context.SaveChangesAsync();
+
+            // 5. Сохраняем историю, если есть изменения
+            if (historyEntries.Any())
+            {
+                context.AssignmentHistories.AddRange(historyEntries);
+                await context.SaveChangesAsync();
+            }
         }
 
         public async Task SoftDeleteAsync(int id, int userId)
@@ -319,6 +359,45 @@ namespace CrmWebArcheonzero.Services
         {
             using var context = _contextFactory();
             return await context.Users.FirstOrDefaultAsync(u => u.Id == id);
+        }
+
+        // ============================================================
+        // ИСТОРИЯ ИЗМЕНЕНИЙ
+        // ============================================================
+
+        public async Task<List<AssignmentHistory>> GetHistoryByClientAsync(int clientId)
+        {
+            using var context = _contextFactory();
+            return await context.AssignmentHistories
+                .Where(h => h.ClientId == clientId)
+                .Include(h => h.FromUser)
+                .Include(h => h.ToUser)
+                .Include(h => h.AssignedByUser)
+                .OrderByDescending(h => h.AssignedAt)
+                .ToListAsync();
+        }
+
+        public async Task AddHistoryEntryAsync(AssignmentHistory entry)
+        {
+            using var context = _contextFactory();
+            context.AssignmentHistories.Add(entry);
+            await context.SaveChangesAsync();
+        }
+
+        private AssignmentHistory CreateHistoryEntry(int clientId, string changeType, string fieldName, string? oldValue, string? newValue, int userId)
+        {
+            return new AssignmentHistory
+            {
+                ClientId = clientId,
+                ChangeType = changeType,
+                FieldName = fieldName,
+                OldValue = oldValue,
+                NewValue = newValue,
+                AssignedByUserId = userId,
+                AssignedAt = DateTime.UtcNow,
+                FromUserId = null,
+                ToUserId = null
+            };
         }
     }
 }

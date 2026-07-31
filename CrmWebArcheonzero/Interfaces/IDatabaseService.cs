@@ -1,4 +1,4 @@
-namespace CrmWebArcheonzero.Services
+namespace CrmWebArcheonzero.Interfaces
 {
     public interface IDatabaseService
     {

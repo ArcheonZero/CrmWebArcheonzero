@@ -1,5 +1,5 @@
+using CrmWebArcheonzero.Interfaces;
 using CrmWebArcheonzero.Models;
-using CrmWebArcheonzero.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -7,12 +7,13 @@ namespace CrmWebArcheonzero.Controllers
 {
     [Authorize]
     public class ClientTasksController : Controller
-    {
-        private readonly IClientRepository _clientRepository;
+    {       
 
-        public ClientTasksController(IClientRepository clientRepository)
+        private readonly ITaskRepository _taskRepository;
+
+        public ClientTasksController(ITaskRepository taskRepository)
         {
-            _clientRepository = clientRepository;
+            _taskRepository = taskRepository;
         }
 
         // ============================================================
@@ -20,12 +21,12 @@ namespace CrmWebArcheonzero.Controllers
         // ============================================================
         public async Task<IActionResult> Index(int clientId)
         {
-            var client = await _clientRepository.GetByIdAsync(clientId);
+            var client = await _taskRepository.GetByIdAsync(clientId);
             if (client == null)
                 return NotFound();
 
-            var tasks = await _clientRepository.GetTasksByClientAsync(clientId);
-            ViewBag.ClientName = client.Name;
+            var tasks = await _taskRepository.GetByClientAsync(clientId);
+            ViewBag.ClientName = client.Client?.Name;
             ViewBag.ClientId = clientId;
             return View(tasks);
         }
@@ -47,7 +48,7 @@ namespace CrmWebArcheonzero.Controllers
             {
                 task.CreatedAt = DateTime.UtcNow;
                 task.IsCompleted = false;
-                await _clientRepository.AddTaskAsync(task);
+                await _taskRepository.AddAsync(task);
                 return RedirectToAction(nameof(Index), new { clientId = task.ClientId });
             }
             return View(task);
@@ -58,7 +59,7 @@ namespace CrmWebArcheonzero.Controllers
         // ============================================================
         public async Task<IActionResult> Edit(int id)
         {
-            var task = await _clientRepository.GetTaskByIdAsync(id);
+            var task = await _taskRepository.GetByIdAsync(id);
             if (task == null)
                 return NotFound();
             return View(task);
@@ -73,7 +74,7 @@ namespace CrmWebArcheonzero.Controllers
 
             if (ModelState.IsValid)
             {
-                await _clientRepository.UpdateTaskAsync(task);
+                await _taskRepository.UpdateAsync(task);
                 return RedirectToAction(nameof(Index), new { clientId = task.ClientId });
             }
             return View(task);
@@ -85,12 +86,12 @@ namespace CrmWebArcheonzero.Controllers
         [HttpPost]
         public async Task<IActionResult> Toggle(int id)
         {
-            var task = await _clientRepository.GetTaskByIdAsync(id);
+            var task = await _taskRepository.GetByIdAsync(id);
             if (task == null)
                 return NotFound();
 
             task.IsCompleted = !task.IsCompleted;
-            await _clientRepository.UpdateTaskAsync(task);
+            await _taskRepository.UpdateAsync(task);
 
             return RedirectToAction(nameof(Index), new { clientId = task.ClientId });
         }
@@ -100,7 +101,7 @@ namespace CrmWebArcheonzero.Controllers
         // ============================================================
         public async Task<IActionResult> Delete(int id)
         {
-            var task = await _clientRepository.GetTaskByIdAsync(id);
+            var task = await _taskRepository.GetByIdAsync(id);
             if (task == null)
                 return NotFound();
             return View(task);
@@ -110,12 +111,12 @@ namespace CrmWebArcheonzero.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var task = await _clientRepository.GetTaskByIdAsync(id);
+            var task = await _taskRepository.GetByIdAsync(id);
             if (task == null)
                 return NotFound();
 
             var clientId = task.ClientId;
-            await _clientRepository.DeleteTaskAsync(id);
+            await _taskRepository.DeleteAsync(id);
             return RedirectToAction(nameof(Index), new { clientId = clientId });
         }
     }

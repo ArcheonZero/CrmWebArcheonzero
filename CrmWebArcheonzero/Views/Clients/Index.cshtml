@@ -3,31 +3,22 @@
 
 @if (User.Identity.IsAuthenticated)
 {
-    <div>
+    <div class="mb-3">
         <span>Пользователь: @User.Identity.Name</span>
         <span class="badge bg-info">@User.FindFirst(ClaimTypes.Role)?.Value</span>
     </div>
 }
+
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
+
 @if (TempData["Success"] != null)
 {
     <div class="alert alert-success">@TempData["Success"]</div>
 }
-@if (TempData["ImportErrors"] != null)
-{
-    <div class="alert alert-danger">
-        <strong>Ошибки импорта:</strong>
-        <ul>
-            @foreach (var error in TempData["ImportErrors"].ToString().Split("<br />", StringSplitOptions.RemoveEmptyEntries))
-            {
-                <li>@error</li>
-            }
-        </ul>
-    </div>
-}
+
 <h1>Список клиентов</h1>
 
 <form method="get" asp-action="Index" class="mb-3">
@@ -51,20 +42,12 @@
             <a asp-controller="Export" asp-action="Excel" class="btn btn-sm btn-success">📊 Excel</a>
             <a asp-controller="Export" asp-action="Csv" class="btn btn-sm btn-secondary">📄 CSV</a>
             <a asp-controller="Export" asp-action="Html" class="btn btn-sm btn-info">🌐 HTML</a>
+            <a asp-controller="Import" asp-action="Index" class="btn btn-sm btn-primary">📥 Импорт</a>
             <a asp-action="Create" class="btn btn-primary">➕ Добавить клиента</a>
         </div>
     </div>
 </form>
-<form method="post" asp-action="ImportExcel" enctype="multipart/form-data" class="mb-3">
-    <div class="row">
-        <div class="col-md-6">
-            <input type="file" name="file" class="form-control" accept=".xlsx,.xls" />
-        </div>
-        <div class="col-md-2">
-            <button type="submit" class="btn btn-primary">📥 Импорт из Excel</button>
-        </div>
-    </div>
-</form>
+
 <table class="table table-striped">
     <thead>
         <tr>

@@ -1,5 +1,5 @@
+using CrmWebArcheonzero.Interfaces;
 using CrmWebArcheonzero.Models;
-using CrmWebArcheonzero.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,11 +8,12 @@ namespace CrmWebArcheonzero.Controllers
     [Authorize]
     public class ClientNotesController : Controller
     {
-        private readonly IClientRepository _clientRepository;
 
-        public ClientNotesController(IClientRepository clientRepository)
+        private readonly INoteRepository _noteRepository;
+
+        public ClientNotesController(INoteRepository noteRepository)
         {
-            _clientRepository = clientRepository;
+            _noteRepository = noteRepository;
         }
 
         // ============================================================
@@ -20,12 +21,12 @@ namespace CrmWebArcheonzero.Controllers
         // ============================================================
         public async Task<IActionResult> Index(int clientId)
         {
-            var client = await _clientRepository.GetByIdAsync(clientId);
+            var client = await _noteRepository.GetByIdAsync(clientId);
             if (client == null)
                 return NotFound();
 
-            var notes = await _clientRepository.GetNotesByClientAsync(clientId);
-            ViewBag.ClientName = client.Name;
+            var notes = await _noteRepository.GetByClientAsync(clientId);
+            ViewBag.ClientName = client.Client?.Name;
             ViewBag.ClientId = clientId;
             return View(notes);
         }
@@ -49,7 +50,7 @@ namespace CrmWebArcheonzero.Controllers
                 CreatedAt = DateTime.UtcNow
             };
 
-            await _clientRepository.AddNoteAsync(note);
+            await _noteRepository.AddAsync(note);
             return RedirectToAction(nameof(Index), new { clientId });
         }
 
@@ -58,7 +59,7 @@ namespace CrmWebArcheonzero.Controllers
         // ============================================================
         public async Task<IActionResult> Edit(int id)
         {
-            var note = await _clientRepository.GetNoteByIdAsync(id);
+            var note = await _noteRepository.GetByIdAsync(id);
             if (note == null)
                 return NotFound();
 
@@ -69,12 +70,12 @@ namespace CrmWebArcheonzero.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, string content)
         {
-            var note = await _clientRepository.GetNoteByIdAsync(id);
+            var note = await _noteRepository.GetByIdAsync(id);
             if (note == null)
                 return NotFound();
 
             note.Content = content;
-            await _clientRepository.UpdateNoteAsync(note);
+            await _noteRepository.UpdateAsync(note);
 
             return RedirectToAction(nameof(Index), new { clientId = note.ClientId });
         }
@@ -85,7 +86,7 @@ namespace CrmWebArcheonzero.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id, int clientId)
         {
-            await _clientRepository.DeleteNoteAsync(id);
+            await _noteRepository.DeleteAsync(id);
             return RedirectToAction(nameof(Index), new { clientId });
         }
     }

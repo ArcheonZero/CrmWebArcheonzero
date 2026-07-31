@@ -27,5 +27,6 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Views\ClientTasks\" />
+	  <Folder Include="Views\Import\" />
 	</ItemGroup>
 </Project>

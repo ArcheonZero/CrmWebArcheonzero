@@ -1,3 +1,4 @@
+using CrmWebArcheonzero.Interfaces;
 using CrmWebArcheonzero.Models;
 using CrmWebArcheonzero.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -8,27 +9,26 @@ namespace CrmWebArcheonzero.Controllers
     [Authorize]
     public class ChatController : Controller
     {
-        private readonly IClientRepository _clientRepository;
+        private readonly IChatRepository _chatRepository;
+        private readonly AuthService _authService;
 
-        public ChatController(IClientRepository clientRepository)
+        public ChatController(IChatRepository chatRepository, AuthService authService)
         {
-            _clientRepository = clientRepository;
+            _chatRepository = chatRepository;
+            _authService = authService;
         }
-
         public async Task<IActionResult> Index()
         {
-            var messages = await _clientRepository.GetChatMessagesAsync();
+            var messages = await _chatRepository.GetMessagesAsync();
             return View(messages);
         }
-
-        [HttpPost]
         public async Task<IActionResult> SendMessage(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
                 return RedirectToAction(nameof(Index));
 
             var userId = GetCurrentUserId();
-            var user = await _clientRepository.GetUserByIdAsync(userId);
+            var user = await _authService.GetUserByIdAsync(userId);
 
             var chatMessage = new ChatMessage
             {
@@ -37,10 +37,9 @@ namespace CrmWebArcheonzero.Controllers
                 SentAt = DateTime.UtcNow
             };
 
-            await _clientRepository.AddChatMessageAsync(chatMessage);
+            await _chatRepository.AddMessageAsync(chatMessage);
             return RedirectToAction(nameof(Index));
         }
-
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst("UserId");

@@ -1,7 +1,7 @@
 using CrmWebArcheonzero.DTO;
 using Magicodes.ExporterAndImporter.Excel;
 
-namespace CrmWebArcheonzero.Interfaces
+namespace CrmWebArcheonzero.Services
 {
     public class ImportService
     {

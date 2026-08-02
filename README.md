@@ -66,7 +66,8 @@ dotnet run --project CrmWebArcheonzero
 🧪 Тесты
 Для запуска тестов выполни:
 
-```bash
+```
+```
 dotnet test
 📄 Лицензия
 Этот проект создан для личного использования и изучения.
@@ -77,9 +78,10 @@ dotnet test
 
 👤 Автор
 ArcheonZero — GitHub
+```
 
-text
 ---
+
 # CRM Web Archeonzero
 
 Version 2.0.1 — web-based CRM system built on ASP.NET Core.

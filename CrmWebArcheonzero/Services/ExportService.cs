@@ -1,4 +1,5 @@
 using CrmWebArcheonzero.DTO;
+using CrmWebArcheonzero.Interfaces;
 using CrmWebArcheonzero.Models;
 using Magicodes.ExporterAndImporter.Csv;
 using Magicodes.ExporterAndImporter.Excel;
@@ -10,7 +11,7 @@ using Xceed.Words.NET;
 
 namespace CrmWebArcheonzero.Services
 {
-    public class ExportService
+    public class ExportService : IExportService
     {
         private readonly ILogger<ExportService> _logger;
 
@@ -23,7 +24,7 @@ namespace CrmWebArcheonzero.Services
         // ============================================================
         // МАССОВЫЙ ЭКСПОРТ (список клиентов)
         // ============================================================
-        public byte[] ExportClientsList(List<Client> clients, string format)
+        public virtual byte[] ExportClientsList(List<Client> clients, string format)
         {
             var dto = clients.Select(c => new ClientExportDto
             {

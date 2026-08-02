@@ -10,9 +10,9 @@ namespace CrmWebArcheonzero.Controllers
     public class ExportController : Controller
     {
         private readonly IClientRepository _clientRepository;
-        private readonly ExportService _exportService;
+        private readonly IExportService _exportService;
 
-        public ExportController(IClientRepository clientRepository, ExportService exportService)
+        public ExportController(IClientRepository clientRepository, IExportService exportService)
         {
             _clientRepository = clientRepository;
             _exportService = exportService;

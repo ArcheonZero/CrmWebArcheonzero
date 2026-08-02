@@ -12,13 +12,13 @@ namespace CrmWebArcheonzero.Controllers
         private readonly IClientRepository _clientRepository;
         private readonly IHistoryRepository _historyRepository;
         private readonly ILogger<ClientsController> _logger;
-        private readonly EmailService _emailService;
+        private readonly IEmailService _emailService;
 
         public ClientsController(
             IClientRepository clientRepository,
             IHistoryRepository historyRepository,
             ILogger<ClientsController> logger,
-            EmailService emailService)
+            IEmailService emailService)
         {
             _clientRepository = clientRepository;
             _historyRepository = historyRepository;
@@ -193,12 +193,13 @@ namespace CrmWebArcheonzero.Controllers
         // ============================================================
         // ВСПОМОГАТЕЛЬНЫЕ
         // ============================================================
-        private int GetCurrentUserId()
+        protected virtual int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst("UserId");
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
                 throw new UnauthorizedAccessException("User ID not found");
             return userId;
         }
+
     }
 }

@@ -1,11 +1,12 @@
-using CrmWebArcheonzero.Models;
-using CrmWebArcheonzero.Data;
-using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
+using CrmWebArcheonzero.Data;
+using CrmWebArcheonzero.Interfaces;
+using CrmWebArcheonzero.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CrmWebArcheonzero.Services
 {
-    public class AuthService
+    public class AuthService : IAuthService
     {
         private readonly ApplicationDbContext _context;
 
@@ -14,7 +15,7 @@ namespace CrmWebArcheonzero.Services
             _context = context;
         }
 
-        public async Task<User?> GetUserByIdAsync(int userId)
+        public virtual async Task<User?> GetUserByIdAsync(int userId)
         {
             if (userId <= 0)
                 return null;
@@ -23,7 +24,7 @@ namespace CrmWebArcheonzero.Services
                 .FirstOrDefaultAsync(u => u.Id == userId);
         }
 
-        public async Task<User?> LoginAsync(string username, string password)
+        public virtual async Task<User?> LoginAsync(string username, string password)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == username && u.IsActive);
@@ -37,7 +38,7 @@ namespace CrmWebArcheonzero.Services
             return user;
         }
 
-        public async Task<bool> RegisterAsync(string username, string password, string email, string fullName, string role = "User")
+        public virtual async Task<bool> RegisterAsync(string username, string password, string email, string fullName, string role = "User")
         {
             if (await _context.Users.AnyAsync(u => u.Username == username))
                 return false;
@@ -58,14 +59,14 @@ namespace CrmWebArcheonzero.Services
             return true;
         }
 
-        public async Task<List<User>> GetAllUsersAsync()
+        public virtual async Task<List<User>> GetAllUsersAsync()
         {
             return await _context.Users
                 .OrderBy(u => u.Username)
                 .ToListAsync();
         }
 
-        public async Task ChangeRoleAsync(int userId, string newRole)
+        public virtual async Task ChangeRoleAsync(int userId, string newRole)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user != null)
@@ -75,7 +76,7 @@ namespace CrmWebArcheonzero.Services
             }
         }
 
-        public async Task ToggleUserStatusAsync(int userId)
+        public virtual async Task ToggleUserStatusAsync(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
             if (user != null)

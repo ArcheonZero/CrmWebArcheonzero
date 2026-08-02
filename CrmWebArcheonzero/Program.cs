@@ -49,16 +49,16 @@ builder.Services.AddScoped<ApplicationDbContext>(provider =>
     return new ApplicationDbContext(optionsBuilder.Options);
 });
 
-builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
-builder.Services.AddScoped<ExportService>();
+builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
 builder.Services.AddScoped<IInteractionRepository, InteractionRepository>();
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IHistoryRepository, HistoryRepository>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
-builder.Services.AddScoped<EmailService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 // === Авторизация ===
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

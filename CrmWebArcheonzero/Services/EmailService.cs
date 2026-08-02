@@ -1,11 +1,12 @@
+using CrmWebArcheonzero.Interfaces;
+using CrmWebArcheonzero.Models;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
-using Microsoft.Extensions.Options;
-using CrmWebArcheonzero.Models;
 
 namespace CrmWebArcheonzero.Services
 {
-    public class EmailService
+    public class EmailService : IEmailService
     {
         private readonly EmailSettings _settings;
 

@@ -10,10 +10,10 @@ namespace CrmWebArcheonzero.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
         private readonly IDatabaseService _databaseService;
 
-        public AccountController(AuthService authService, IDatabaseService databaseService)
+        public AccountController(IAuthService authService, IDatabaseService databaseService)
         {
             _authService = authService;
             _databaseService = databaseService;

@@ -10,9 +10,9 @@ namespace CrmWebArcheonzero.Controllers
     public class ChatController : Controller
     {
         private readonly IChatRepository _chatRepository;
-        private readonly AuthService _authService;
+        private readonly IAuthService _authService;
 
-        public ChatController(IChatRepository chatRepository, AuthService authService)
+        public ChatController(IChatRepository chatRepository, IAuthService authService)
         {
             _chatRepository = chatRepository;
             _authService = authService;

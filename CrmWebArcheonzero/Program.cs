@@ -45,7 +45,7 @@ builder.Services.AddScoped<ApplicationDbContext>(provider =>
             optionsBuilder.UseSqlite(connectionString);
             break;
     }
-
+    Console.WriteLine($"[Program] ПРОВЕРКА: полный путь к БД: {Path.GetFullPath(connectionString.Replace("Data Source=", "").Split(';')[0])}");
     return new ApplicationDbContext(optionsBuilder.Options);
 });
 

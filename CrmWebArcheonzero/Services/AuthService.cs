@@ -61,9 +61,17 @@ namespace CrmWebArcheonzero.Services
 
         public virtual async Task<List<User>> GetAllUsersAsync()
         {
-            return await _context.Users
+            var users = await _context.Users
                 .OrderBy(u => u.Username)
                 .ToListAsync();
+
+            Console.WriteLine($"[GetAllUsersAsync] Загружено пользователей: {users.Count}");
+            foreach (var u in users)
+            {
+                Console.WriteLine($"  - {u.Id}: {u.Username} ({u.Role})");
+            }
+
+            return users;
         }
 
         public virtual async Task ChangeRoleAsync(int userId, string newRole)
@@ -75,7 +83,17 @@ namespace CrmWebArcheonzero.Services
                 await _context.SaveChangesAsync();
             }
         }
-
+        public async Task UpdateUserAsync(int userId, string username, string fullName, string email)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user != null)
+            {
+                user.Username = username;
+                user.FullName = fullName;
+                user.Email = email;
+                await _context.SaveChangesAsync();
+            }
+        }
         public virtual async Task ToggleUserStatusAsync(int userId)
         {
             var user = await _context.Users.FindAsync(userId);
@@ -84,6 +102,11 @@ namespace CrmWebArcheonzero.Services
                 user.IsActive = !user.IsActive;
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task<User?> GetUserByUsernameAsync(string username)
+        {
+            return await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == username);
         }
     }
 }

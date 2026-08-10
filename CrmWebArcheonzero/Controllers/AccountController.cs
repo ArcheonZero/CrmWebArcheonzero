@@ -12,11 +12,12 @@ namespace CrmWebArcheonzero.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IDatabaseService _databaseService;
-
-        public AccountController(IAuthService authService, IDatabaseService databaseService)
+        private readonly ILogger<AccountController> _logger;
+        public AccountController(IAuthService authService, IDatabaseService databaseService, ILogger<AccountController> logger)
         {
             _authService = authService;
             _databaseService = databaseService;
+            _logger = logger;
         }
 
         [HttpGet]
@@ -36,8 +37,6 @@ namespace CrmWebArcheonzero.Controllers
 
             var dbService = HttpContext.RequestServices.GetRequiredService<IDatabaseService>();
             dbService.SetProvider(selectedProvider);
-            var connectionString = GetConnectionStringForProvider(selectedProvider);
-            dbService.SetConnectionString(connectionString);
 
             Console.WriteLine($"Выбрана база: {selectedProvider}");
             ViewBag.DbMessage = $"Выбрана база данных: {selectedProvider}";
@@ -58,6 +57,8 @@ namespace CrmWebArcheonzero.Controllers
             }
 
             var user = await _authService.LoginAsync(username, password);
+            // ✅ ВРЕМЕННОЕ ЛОГИРОВАНИЕ
+            Console.WriteLine($"[LOGIN] username={username}, найден пользователь: {user?.Username} (ID: {user?.Id}, Role: {user?.Role})");
             if (user == null)
             {
                 ViewBag.Error = "Неверный логин или пароль";
@@ -74,7 +75,11 @@ namespace CrmWebArcheonzero.Controllers
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
-
+            // ✅ ВРЕМЕННОЕ ЛОГИРОВАНИЕ
+            foreach (var claim in claims)
+            {
+                Console.WriteLine($"[CLAIM] {claim.Type} = {claim.Value}");
+            }
             return Redirect(returnUrl);
         }
 
@@ -203,8 +208,43 @@ namespace CrmWebArcheonzero.Controllers
             {
                 "PostgreSQL" => "Host=aws-0-eu-west-1.pooler.supabase.com;Port=5432;Database=postgres;Username=postgres.qnlvugqiokfjcerpvobx;Password=qqRWeKgP6Aoibruz;SSL Mode=Disable;",
                 "SqlServer" => "Server=localhost\\SQLEXPRESS;Database=CrmDb;User Id=crm_user;Password=CrmUser123;MultipleActiveResultSets=true;Encrypt=false;",
-                _ => "Data Source=crm.db;Mode=ReadWriteCreate;Cache=Shared;"
+                _ => "Data Source=C:\\+++MyDir+++\\++Dev\\crm.db;Mode=ReadWriteCreate;Cache=Shared;" // ← абсолютный путь
             };
+        }
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UpdateUser(int userId, string username, string fullName, string email)
+        {
+            var currentUserId = int.Parse(User.FindFirst("UserId").Value);
+            var currentUserRole = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            _logger.LogInformation($"UpdateUser: userId={userId}, currentUserId={currentUserId}, currentUserRole={currentUserRole}");
+
+            // ✅ Если роль не Admin — возвращаем ошибку
+            if (currentUserRole != "Admin")
+            {
+                _logger.LogWarning($"Пользователь {currentUserId} не является админом");
+                TempData["Error"] = "Недостаточно прав.";
+                return RedirectToAction(nameof(Users)); // ← здесь был пропущен return
+            }
+
+            if (userId == currentUserId)
+            {
+                TempData["Error"] = "Вы не можете редактировать свой аккаунт.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            // Проверка уникальности логина
+            var existingUser = await _authService.GetUserByUsernameAsync(username);
+            if (existingUser != null && existingUser.Id != userId)
+            {
+                TempData["Error"] = "Пользователь с таким логином уже существует.";
+                return RedirectToAction(nameof(Users));
+            }
+
+            await _authService.UpdateUserAsync(userId, username, fullName, email);
+            TempData["Success"] = "Данные пользователя обновлены.";
+            return RedirectToAction(nameof(Users));
         }
     }
 }

@@ -70,11 +70,27 @@
                         @(user.IsActive ? "Активен" : "Заблокирован")
                     </span>
                 </td>
-                <td>
-                    <form method="post" asp-action="ToggleUserStatus" style="display: inline;">
+               <td>
+                    <form method="post" asp-action="UpdateUser" style="display: inline-block;">
+                        <input type="hidden" name="userId" value="@user.Id" />
+        
+                        <input type="text" name="username" value="@user.Username" 
+                               class="form-control form-control-sm" style="width: 100px; display: inline-block;" />
+        
+                        <input type="text" name="fullName" value="@user.FullName" 
+                               class="form-control form-control-sm" style="width: 120px; display: inline-block;" />
+        
+                        <input type="email" name="email" value="@user.Email" 
+                               class="form-control form-control-sm" style="width: 150px; display: inline-block;" />
+        
+                        <button type="submit" class="btn btn-sm btn-primary">💾</button>
+                    </form>
+
+                    <!-- Форма для блокировки -->
+                    <form method="post" asp-action="ToggleUserStatus" style="display: inline-block;">
                         <input type="hidden" name="userId" value="@user.Id" />
                         <button type="submit" class="btn btn-sm @(user.IsActive ? "btn-warning" : "btn-success")">
-                            @(user.IsActive ? "Заблокировать" : "Разблокировать")
+                            @(user.IsActive ? "🔒" : "🔓")
                         </button>
                     </form>
                 </td>

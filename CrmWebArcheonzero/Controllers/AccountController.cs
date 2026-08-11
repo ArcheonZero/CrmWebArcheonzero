@@ -69,8 +69,7 @@ namespace CrmWebArcheonzero.Controllers
             }
 
             var user = await _authService.LoginAsync(username, password);
-            // ✅ ВРЕМЕННОЕ ЛОГИРОВАНИЕ
-            Console.WriteLine($"[LOGIN] username={username}, найден пользователь: {user?.Username} (ID: {user?.Id}, Role: {user?.Role})");
+
             if (user == null)
             {
                 ViewBag.Error = "Неверный логин или пароль";
@@ -87,11 +86,7 @@ namespace CrmWebArcheonzero.Controllers
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
-            // ✅ ВРЕМЕННОЕ ЛОГИРОВАНИЕ
-            foreach (var claim in claims)
-            {
-                Console.WriteLine($"[CLAIM] {claim.Type} = {claim.Value}");
-            }
+
             return Redirect(returnUrl);
         }
         [HttpPost]

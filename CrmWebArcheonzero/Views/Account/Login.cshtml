@@ -14,7 +14,9 @@
 {
     <div class="alert alert-success">@ViewBag.DbMessage</div>
 }
-
+<div id="connectionMessage" style="display:none; padding:10px; background-color:#d4edda; color:#155724; border:1px solid #c3e6cb; border-radius:4px; margin-top:10px;">
+    Успешное подключение к базе данных.
+</div>
 <!-- Кнопки выбора базы -->
 <form method="post" asp-action="SelectDatabase">
     <div class="form-group">
@@ -100,6 +102,16 @@ document.querySelectorAll('[name="selectedProvider"]').forEach(btn => {
                     document.getElementById('dbDialog').style.display = 'none';
                     alert('База данных отсутствует. Обратитесь к администратору.');
                 };
+            } if (data.error === 'db_not_found') {
+                // показываем модальное окно
+            } else if (data.success) {
+                // ✅ ПОКАЗЫВАЕМ СООБЩЕНИЕ ОБ УСПЕШНОМ ПОДКЛЮЧЕНИИ
+                document.getElementById('connectionMessage').style.display = 'block';
+                document.getElementById('connectionMessage').innerText = 'Подключение к базе данных выполнено.';
+                setTimeout(() => {
+                    document.getElementById('connectionMessage').style.display = 'none';
+                    location.reload();
+                }, 1500);
             } else {
                 location.reload();
             }
@@ -107,3 +119,4 @@ document.querySelectorAll('[name="selectedProvider"]').forEach(btn => {
     });
 });
 </script>
+

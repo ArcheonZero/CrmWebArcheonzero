@@ -6,11 +6,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Security.Claims;
 using Xunit;
-using Microsoft.AspNetCore.Routing;
 
 namespace CrmWebArcheonzero.Tests.Controllers
 {
@@ -24,8 +25,9 @@ namespace CrmWebArcheonzero.Tests.Controllers
         {
             authService = new Mock<AuthService>(null);
             dbService = new Mock<IDatabaseService>();
+            var mockLogger = new Mock<ILogger<AccountController>>(); // ← добавить
 
-            var controller = new AccountController(authService.Object, dbService.Object);
+            var controller = new AccountController(authService.Object, dbService.Object, mockLogger.Object);
 
             // Настраиваем HttpContext
             var services = new ServiceCollection();

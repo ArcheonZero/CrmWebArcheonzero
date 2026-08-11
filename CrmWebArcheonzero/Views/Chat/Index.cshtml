@@ -7,10 +7,15 @@
     {
         foreach (var msg in Model.OrderBy(m => m.SentAt))
         {
-            <div style="margin-bottom: 10px;">
-                <strong>@msg.User.FullName</strong>
-                <span style="color: #888; font-size: 0.8rem;">@msg.SentAt.ToString("dd.MM.yyyy HH:mm")</span>
-                <div style="background: white; padding: 8px; border-radius: 5px; border: 1px solid #eee;">
+            <div style="margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px;">
+                <div style="font-weight: bold; color: #000;">
+                    @msg.User.Username
+                    <span style="font-weight: normal;">@msg.User.FullName</span>
+                    <span style="color: #555; font-weight: normal;">@msg.User.Email</span>
+                    <span style="color: #555; font-weight: normal;">(Роль: @msg.User.Role)</span>
+                    <span style="color: #888; font-weight: normal; font-size: 0.8rem;"> — @msg.SentAt.ToString("dd.MM.yyyy HH:mm")</span>
+                </div>
+                <div style="color: #000; background: white; padding: 8px; border-radius: 5px; border: 1px solid #eee; margin-top: 4px;">
                     @msg.Message
                 </div>
             </div>

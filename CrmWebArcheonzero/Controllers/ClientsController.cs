@@ -189,7 +189,46 @@ namespace CrmWebArcheonzero.Controllers
             ViewBag.ClientId = id;
             return View(history);
         }
+        // ============================================================
+        // БЭКАП БАЗЫ ДАННЫХ
+        // ============================================================
+        public async Task<IActionResult> BackupDatabase()
+        {
+            try
+            {
+                var dbService = HttpContext.RequestServices.GetRequiredService<IDatabaseService>();
+                var providerName = dbService.GetProvider();
+                var connectionString = dbService.GetConnectionString();
 
+                if (providerName == "Sqlite")
+                {
+                    var dbPath = connectionString.Replace("Data Source=", "").Split(';')[0];
+                    if (System.IO.File.Exists(dbPath))
+                    {
+                        var backupPath = Path.Combine(
+                            Path.GetDirectoryName(dbPath),
+                            $"backup_{DateTime.Now:yyyyMMdd_HHmmss}_{Path.GetFileName(dbPath)}"
+                        );
+                        System.IO.File.Copy(dbPath, backupPath);
+                        TempData["Success"] = $"Бэкап создан: {backupPath}";
+                    }
+                    else
+                    {
+                        TempData["Error"] = "Файл базы данных не найден.";
+                    }
+                }
+                else
+                {
+                    TempData["Info"] = "Бэкап для PostgreSQL и SQL Server пока не реализован. Используйте внешние инструменты.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Ошибка создания бэкапа: {ex.Message}";
+            }
+
+            return RedirectToAction("Index");
+        }
         // ============================================================
         // ВСПОМОГАТЕЛЬНЫЕ
         // ============================================================

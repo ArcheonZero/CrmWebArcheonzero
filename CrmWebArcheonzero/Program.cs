@@ -17,7 +17,6 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
-
 // === Регистрация сервисов ===
 builder.Services.AddScoped<IDatabaseService, DatabaseService>();
 

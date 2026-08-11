@@ -4,6 +4,7 @@
 
 <h2>Вход в CRM</h2>
 
+<!-- Сообщения об ошибках -->
 @if (ViewBag.Error != null)
 {
     <div class="alert alert-danger">@ViewBag.Error</div>
@@ -40,3 +41,69 @@
     </div>
     <button type="submit" class="btn btn-primary">Войти</button>
 </form>
+
+<!-- ============================================================ -->
+<!-- МОДАЛЬНОЕ ОКНО (добавить в конце файла) -->
+<!-- ============================================================ -->
+<div id="dbDialog" style="display:none; position:fixed; top:30%; left:50%; transform:translate(-50%, -50%); background:white; padding:20px; border:1px solid #ccc; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:1000; color: #000;">
+    <p id="dbMessage" style="font-size:16px; font-weight:bold; color:#000;">База данных не найдена. Создать новую?</p>
+    <button id="btnCreateDb" class="btn btn-success">Да</button>
+    <button id="btnCancelDb" class="btn btn-secondary">Нет</button>
+</div>
+
+<!-- ============================================================ -->
+<!-- JAVASCRIPT (добавить в конце файла) -->
+<!-- ============================================================ -->
+<script>
+    console.log('Скрипт загружен');
+    // Перехватываем клик по кнопкам выбора базы
+document.querySelectorAll('[name="selectedProvider"]').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const provider = this.value;
+
+        const formData = new FormData();
+        formData.append('selectedProvider', provider);
+
+        fetch('/Account/SelectDatabase', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Ответ сервера:', data);
+            if (data.error === 'db_not_found') {
+                document.getElementById('dbMessage').innerText = data.message;
+                document.getElementById('dbDialog').style.display = 'block';
+
+                // Кнопка "Да"
+                document.getElementById('btnCreateDb').onclick = function() {
+                    fetch('/Account/CreateDatabase', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ provider: provider })
+                    })
+                    .then(response => response.json())
+                    .then(result => {
+                        if (result.success) {
+                            alert('База создана!');
+                            document.getElementById('dbDialog').style.display = 'none';
+                            location.reload();
+                        } else {
+                            alert('Ошибка создания базы: ' + result.message);
+                        }
+                    });
+                };
+
+                // Кнопка "Нет"
+                document.getElementById('btnCancelDb').onclick = function() {
+                    document.getElementById('dbDialog').style.display = 'none';
+                    alert('База данных отсутствует. Обратитесь к администратору.');
+                };
+            } else {
+                location.reload();
+            }
+        });
+    });
+});
+</script>

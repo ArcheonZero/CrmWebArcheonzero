@@ -7,7 +7,7 @@ namespace CrmWebArcheonzero.Data
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
-        {
+        {  
         }
 
         public DbSet<Client> Clients { get; set; }
@@ -17,6 +17,7 @@ namespace CrmWebArcheonzero.Data
         public DbSet<User> Users { get; set; }
         public DbSet<ChatMessage> ChatMessages { get; set; }
         public DbSet<AssignmentHistory> AssignmentHistories { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // === НАСТРОЙКА ДЛЯ USER ===
@@ -93,9 +94,11 @@ namespace CrmWebArcheonzero.Data
             });
         }
 
-
-public void EnsureSeedData()
+        public void EnsureSeedData()
         {
+            // ✅ Добавляем создание базы, если её нет
+
+
             // === ПОЛЬЗОВАТЕЛИ ===
             if (!Users.Any(u => u.Username == "admin"))
             {
@@ -171,40 +174,39 @@ public void EnsureSeedData()
             if (Clients.Any()) return;
 
             var clients = new List<Client>
-    {
-        new Client
-        {
-            Name = "Иван Петров",
-            Phone = "+7 (912) 345-67-89",
-            Email = "ivan@mail.ru",
-            Status = "Active",
-            Company = "ООО ТехноСервис",
-            CreatedAt = DateTime.UtcNow.AddDays(-30),
-            Birthday = new DateTime(1985, 5, 15)
-        },
-        new Client
-        {
-            Name = "Мария Сидорова",
-            Phone = "+7 (903) 222-33-44",
-            Email = "maria@yandex.ru",
-            Status = "Lead",
-            Company = "ИП Сидорова",
-            CreatedAt = DateTime.UtcNow.AddDays(-15)
-        },
-        new Client
-        {
-            Name = "Алексей Иванов",
-            Phone = "+7 (911) 555-66-77",
-            Email = "alex@google.com",
-            Status = "Inactive",
-            Company = "ООО Альфа",
-            CreatedAt = DateTime.UtcNow.AddDays(-60)
-        }
-    };
+            {
+                new Client
+                {
+                    Name = "Иван Петров",
+                    Phone = "+7 (912) 345-67-89",
+                    Email = "ivan@mail.ru",
+                    Status = "Active",
+                    Company = "ООО ТехноСервис",
+                    CreatedAt = DateTime.UtcNow.AddDays(-30),
+                    Birthday = new DateTime(1985, 5, 15)
+                },
+                new Client
+                {
+                    Name = "Мария Сидорова",
+                    Phone = "+7 (903) 222-33-44",
+                    Email = "maria@yandex.ru",
+                    Status = "Lead",
+                    Company = "ИП Сидорова",
+                    CreatedAt = DateTime.UtcNow.AddDays(-15)
+                },
+                new Client
+                {
+                    Name = "Алексей Иванов",
+                    Phone = "+7 (911) 555-66-77",
+                    Email = "alex@google.com",
+                    Status = "Inactive",
+                    Company = "ООО Альфа",
+                    CreatedAt = DateTime.UtcNow.AddDays(-60)
+                }
+            };
 
             Clients.AddRange(clients);
             SaveChanges();
         }
     }
-    }
-
+}

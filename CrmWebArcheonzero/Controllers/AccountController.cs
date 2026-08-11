@@ -1,9 +1,11 @@
+using CrmWebArcheonzero.Data;
 using CrmWebArcheonzero.Interfaces;
 using CrmWebArcheonzero.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
 namespace CrmWebArcheonzero.Controllers
@@ -27,20 +29,24 @@ namespace CrmWebArcheonzero.Controllers
             return View();
         }
         [HttpPost]
+        [HttpPost]
         public IActionResult SelectDatabase(string selectedProvider)
         {
             if (string.IsNullOrEmpty(selectedProvider))
             {
-                ViewBag.Error = "База данных не выбрана.";
-                return View("Login");
+                return Json(new { error = "no_provider", message = "База данных не выбрана." });
             }
 
             var dbService = HttpContext.RequestServices.GetRequiredService<IDatabaseService>();
             dbService.SetProvider(selectedProvider);
 
-            Console.WriteLine($"Выбрана база: {selectedProvider}");
-            ViewBag.DbMessage = $"Выбрана база данных: {selectedProvider}";
-            return View("Login");
+            // Проверяем существование базы
+            if (!DatabaseExists(selectedProvider))
+            {
+                return Json(new { error = "db_not_found", message = "База данных не найдена. Создать новую?" });
+            }
+
+            return Json(new { success = true, message = "База выбрана" });
         }
         [HttpPost]
         public async Task<IActionResult> Login(string username, string password, string selectedProvider, string returnUrl = "/Clients")
@@ -52,8 +58,14 @@ namespace CrmWebArcheonzero.Controllers
                 dbService.SetProvider(selectedProvider);
                 var connectionString = GetConnectionStringForProvider(selectedProvider);
                 dbService.SetConnectionString(connectionString);
-
                 Console.WriteLine($"База сохранена: {selectedProvider}");
+            }
+
+            // ✅ ПРОВЕРКА: существует ли база данных?
+            if (!await DatabaseExistsAsync())
+            {
+                // Возвращаем JSON с флагом "db_not_found"
+                return Json(new { error = "db_not_found", message = "База данных не найдена. Создать новую?" });
             }
 
             var user = await _authService.LoginAsync(username, password);
@@ -82,6 +94,104 @@ namespace CrmWebArcheonzero.Controllers
             }
             return Redirect(returnUrl);
         }
+        [HttpPost]
+        public IActionResult CreateDatabase(string provider)
+        {
+            try
+            {
+                var dbService = HttpContext.RequestServices.GetRequiredService<IDatabaseService>();
+                var connectionString = dbService.GetConnectionString();
+
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+                switch (provider)
+                {
+                    case "PostgreSQL":
+                        optionsBuilder.UseNpgsql(connectionString);
+                        break;
+                    case "SqlServer":
+                        optionsBuilder.UseSqlServer(connectionString);
+                        break;
+                    case "Sqlite":
+                    default:
+                        optionsBuilder.UseSqlite(connectionString);
+                        break;
+                }
+
+                using var context = new ApplicationDbContext(optionsBuilder.Options);
+                context.Database.EnsureCreated();
+                context.EnsureSeedData();
+
+                return Json(new { success = true, message = "База данных создана" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { error = "create_failed", message = ex.Message });
+            }
+        }
+        private bool DatabaseExists(string provider)
+        {
+            try
+            {
+                var dbService = HttpContext.RequestServices.GetRequiredService<IDatabaseService>();
+                var connectionString = dbService.GetConnectionString();
+
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+                switch (provider)
+                {
+                    case "PostgreSQL":
+                        optionsBuilder.UseNpgsql(connectionString);
+                        break;
+                    case "SqlServer":
+                        optionsBuilder.UseSqlServer(connectionString);
+                        break;
+                    case "Sqlite":
+                    default:
+                        optionsBuilder.UseSqlite(connectionString);
+                        break;
+                }
+
+                using var context = new ApplicationDbContext(optionsBuilder.Options);
+                return context.Database.CanConnect();
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        private async Task<bool> DatabaseExistsAsync()
+        {
+            try
+            {
+                var dbService = HttpContext.RequestServices.GetRequiredService<IDatabaseService>();
+                var connectionString = dbService.GetConnectionString();
+                var providerName = dbService.GetProvider();
+
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+                switch (providerName)
+                {
+                    case "PostgreSQL":
+                        optionsBuilder.UseNpgsql(connectionString);
+                        break;
+                    case "SqlServer":
+                        optionsBuilder.UseSqlServer(connectionString);
+                        break;
+                    case "Sqlite":
+                    default:
+                        optionsBuilder.UseSqlite(connectionString);
+                        break;
+                }
+
+                using var context = new ApplicationDbContext(optionsBuilder.Options);
+                return await context.Database.CanConnectAsync();
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+
+
 
         public async Task<IActionResult> Logout()
         {

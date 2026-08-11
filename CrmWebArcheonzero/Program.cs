@@ -73,36 +73,34 @@ builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// === Создание базы при первом запуске ===
-using (var scope = app.Services.CreateScope())
-{
-    var dbService = scope.ServiceProvider.GetRequiredService<IDatabaseService>();
-    var providerName = dbService.GetProvider();
-    var connectionString = dbService.GetConnectionString();
-
-    Console.WriteLine($"[Program] Создаём базу с провайдером: {providerName}");
-    Console.WriteLine($"[Program] Строка подключения: {connectionString}");
-
-    var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-
-    switch (providerName)
-    {
-        case "PostgreSQL":
-            optionsBuilder.UseNpgsql(connectionString);
-            break;
-        case "SqlServer":
-            optionsBuilder.UseSqlServer(connectionString);
-            break;
-        case "Sqlite":
-        default:
-            optionsBuilder.UseSqlite(connectionString);
-            break;
-    }
-
-    using var dbContext = new ApplicationDbContext(optionsBuilder.Options);
-    dbContext.Database.EnsureCreated();
-    dbContext.EnsureSeedData();
-}
+// ============================================================
+// ⚠️ БЛОК СОЗДАНИЯ БАЗЫ ПРИ СТАРТЕ — УДАЛЁН
+// ============================================================
+// using (var scope = app.Services.CreateScope())
+// {
+//     var dbService = scope.ServiceProvider.GetRequiredService<IDatabaseService>();
+//     var providerName = dbService.GetProvider();
+//     var connectionString = dbService.GetConnectionString();
+//     Console.WriteLine($"[Program] Создаём базу с провайдером: {providerName}");
+//     Console.WriteLine($"[Program] Строка подключения: {connectionString}");
+//     var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+//     switch (providerName)
+//     {
+//         case "PostgreSQL":
+//             optionsBuilder.UseNpgsql(connectionString);
+//             break;
+//         case "SqlServer":
+//             optionsBuilder.UseSqlServer(connectionString);
+//             break;
+//         case "Sqlite":
+//         default:
+//             optionsBuilder.UseSqlite(connectionString);
+//             break;
+//     }
+//     using var dbContext = new ApplicationDbContext(optionsBuilder.Options);
+//     dbContext.Database.EnsureCreated();
+//     dbContext.EnsureSeedData();
+// }
 
 // === Настройка маршрутизации ===
 app.UseRouting();
